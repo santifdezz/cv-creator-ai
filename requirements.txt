@@ -1,0 +1,22 @@
+# ===============================================
+# DEPENDENCIAS PRINCIPALES - CV GENERATOR AI
+# ===============================================
+
+# 🎨 Interfaz web
+gradio>=4.42.0,<4.44.0  # Versión estable compatible con Python 3.13
+
+# 📄 Generación de PDF
+reportlab>=4.2.0,<5.0.0
+Pillow>=10.0.0,<11.0.0
+
+# 🌐 Requests HTTP
+requests>=2.32.0,<3.0.0
+
+# 📤 Manejo de archivos
+python-multipart>=0.0.9
+
+# 🔒 Variables de entorno
+python-dotenv>=1.0.0
+
+# 📊 Validaciones adicionales
+pydantic>=2.0.0
