@@ -1,4 +1,4 @@
-
+Ver [metadatos del proyecto](metadata.yml) para configuración de HF Spaces.
 
 # Generador Automático de CV y Cartas de Presentación 
 
