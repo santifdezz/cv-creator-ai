@@ -1,5 +1,5 @@
 ---
-title: Cv Generator
+title: CVision
 emoji: 🔥
 colorFrom: pink
 colorTo: yellow
@@ -8,7 +8,7 @@ sdk_version: 5.45.0
 app_file: app.py
 pinned: false
 license: mit
-short_description: AI Curriculum Vitae Generator
+short_description: CVision - AI Curriculum Vitae Generator 
 ---
 
 # Generador Automático de CV y Cartas de Presentación 

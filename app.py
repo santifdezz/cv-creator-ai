@@ -1,563 +1,441 @@
-#!/usr/bin/env python3
-"""
-Generador Automático de CV con IA - Versión Modular 2.0
-Aplicación principal con arquitectura limpia y componentes modulares
-
-Autor: Tu nombre
-Fecha: 2025
-Versión: 2.0 - Clean Architecture + WYSIWYG + Drag-and-Drop
-"""
-
 import gradio as gr
 import os
-import sys
-from typing import Dict, Any, List, Tuple
+import json
+from datetime import datetime
+from typing import Dict, List, Tuple, Optional, Any
+import logging
+import traceback
+import tempfile
+import shutil
 
-# Importar módulos locales
-from src.config import API_CONFIGS
+# Importar nuestros módulos
 from src.ai_service import AIService
+from src.content_generator import ContentGenerator  
 from src.pdf_generator import PDFGenerator
-from src.utils import validate_form_data, format_success_message
+from src.config import API_CONFIGS
+from src.utils import validate_email, validate_phone, validate_linkedin, clean_text
 
-# Importar componentes UI modulares
+# Importar componentes modulares
 from src.ui_components import (
     PersonalInfoComponent,
-    RichTextComponent, 
-    DraggableSectionComponent,
-    TemplateSelector,
+    ExperienceComponent,
+    SkillsComponent,
+    AIConfigComponent,
+    GenerationComponent,
     ADVANCED_CSS,
     ADVANCED_JAVASCRIPT
 )
+from src.ui_components.wysiwyg_component import WYSIWYGComponent
 
-import asyncio
-
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class CVGeneratorApp:
-    """Aplicación principal del generador de CV con arquitectura modular"""
+    """Aplicación principal para generar CVs con IA - Versión modular"""
     
     def __init__(self):
-        """Inicializar la aplicación y sus componentes"""
         self.ai_service = AIService()
+        self.content_generator = ContentGenerator()
         self.pdf_generator = PDFGenerator()
-        self.components = {}
-        self.interface = None
         
-    def create_interface(self) -> gr.Blocks:
-        """Crear la interfaz principal usando componentes modulares"""
+        # Estado de autoguardado
+        self.autosave_enabled = True
+        self.autosave_data = {}
+        
+        # Inicializar componentes modulares
+        self.personal_info = PersonalInfoComponent()
+        self.experience = ExperienceComponent()
+        self.skills = SkillsComponent()
+        self.ai_config = AIConfigComponent()
+        self.generation = GenerationComponent()
+        self.wysiwyg = WYSIWYGComponent()
+        
+        # Almacenar componentes renderizados
+        self.rendered_components = {}
+        
+    def create_interface(self):
+        """Crear la interfaz de Gradio usando componentes modulares"""
         
         with gr.Blocks(
-            css=self._get_custom_css(),
-            title="🚀 CV Generator AI v2.0 - Editor Avanzado",
             theme=gr.themes.Soft(
                 primary_hue="blue",
-                secondary_hue="slate", 
+                secondary_hue="gray", 
                 neutral_hue="slate"
-            )
-        ) as interface:
+            ),
+            title="🚀 CV Creator AI - Generador Profesional de CVs",
+            css=self.get_custom_css()
+        ) as demo:
             
             # Header principal
-            self._render_header()
+            gr.HTML("""
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; text-align: center; margin: -1rem -1rem 2rem -1rem; border-radius: 0 0 20px 20px;">
+                <h1 style="color: white; font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🚀 <strong>CV Creator AI</strong>
+                </h1>
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin-top: 0.5rem; margin-bottom: 0;">
+                    ✨ Genera CVs profesionales optimizados para ATS con Inteligencia Artificial
+                </p>
+            </div>
+            """)
             
-            # Selector de plantilla
-            template_component = TemplateSelector()
-            template_selector = template_component.render()
-            self.components['template'] = template_selector
+            # Contenido principal reorganizado usando componentes modulares (3 columnas equitativas)
+            with gr.Row(equal_height=False):
+                # ===================================================================
+                # COLUMNA 1: INFORMACIÓN PERSONAL + CONFIGURACIÓN IA (33%)
+                # ===================================================================
+                with gr.Column(scale=1, min_width=320):
+                    # Renderizar componente de información personal
+                    personal_components = self.personal_info.render()
+                    self.rendered_components.update(personal_components)
+                    
+                    # Renderizar componente de configuración IA
+                    ai_components = self.ai_config.render()
+                    self.rendered_components.update(ai_components)
+                
+                # ===================================================================
+                # COLUMNA 2: EXPERIENCIA PROFESIONAL + EDUCACIÓN (33%)
+                # ===================================================================
+                with gr.Column(scale=1, min_width=350):
+                    # Renderizar componente de experiencia
+                    experience_components = self.experience.render()
+                    self.rendered_components.update(experience_components)
+                
+                # ===================================================================
+                # COLUMNA 3: HABILIDADES + EXTRAS + GENERACIÓN (33%)
+                # ===================================================================
+                with gr.Column(scale=1, min_width=320):
+                    # Renderizar componente de habilidades
+                    skills_components = self.skills.render()
+                    self.rendered_components.update(skills_components)
+                    
+                    # Renderizar componente de generación
+                    generation_components = self.generation.render()
+                    self.rendered_components.update(generation_components)
             
-            # Contenido principal en secciones arrastrables
-            self._render_main_content()
+            # ===================================================================
+            # ÁREA DE RESULTADOS (Ancho completo)
+            # ===================================================================
+            results_components = self.generation.render_results_area()
+            self.rendered_components.update(results_components)
             
-            # Botones de acción
-            generate_btn, live_preview_btn = self._render_action_buttons()
+            # ===================================================================
+            # EDITOR WYSIWYG Y DRAG-AND-DROP (Sección expandible)
+            # ===================================================================
+            with gr.Accordion("✨ **Editor Avanzado WYSIWYG & Drag-and-Drop**", open=False):
+                gr.Markdown("### 🎨 **Edición Visual Avanzada**")
+                gr.Markdown("*Utiliza el editor WYSIWYG para formatear tu CV visualmente y reorganiza las secciones arrastrándolas.*")
+                
+                wysiwyg_components = self.wysiwyg.render()
+                self.rendered_components.update(wysiwyg_components)
             
-            # Área de resultados
-            pdf_output, status_output = self._render_results_area()
-            
-            # Configurar eventos
-            self._setup_events(generate_btn, live_preview_btn, pdf_output, status_output)
-            
-            # JavaScript avanzado
-            gr.HTML(ADVANCED_JAVASCRIPT)
+            # ===================================================================
+            # EVENT HANDLERS
+            # ===================================================================
+            self._setup_event_handlers()
             
             # Footer informativo
-            self._render_footer()
-            
-        self.interface = interface
-        return interface
-    
-    def _render_header(self):
-        """Renderizar el header principal"""
-        gr.HTML("""
-        <div class="main-header">
-            <h1>🚀 CV Generator AI v2.0</h1>
-            <p>Editor avanzado con WYSIWYG, drag-and-drop y múltiples plantillas</p>
-            <div class="feature-badges">
-                <span class="badge">✏️ Editor WYSIWYG</span>
-                <span class="badge">🔄 Drag & Drop</span>
-                <span class="badge">🎨 4 Plantillas</span>
-                <span class="badge">📱 Responsive</span>
-                <span class="badge">💾 Auto-save</span>
+            gr.HTML("""
+            <div style="text-align: center; padding: 2rem; color: #6b7280; border-top: 1px solid #e5e7eb; margin-top: 2rem;">
+                <p>🚀 <strong>CV Creator AI</strong> - Potenciado por Inteligencia Artificial</p>
+                <p style="font-size: 0.9rem;">✨ Genera CVs profesionales optimizados para ATS en segundos</p>
             </div>
-        </div>
-        """)
-    
-    def _render_main_content(self):
-        """Renderizar el contenido principal con secciones arrastrables"""
+            """)
         
-        # Contenedor principal con columnas responsivas
-        with gr.Row():
-            # Columna izquierda
-            with gr.Column(scale=1):
-                # Información personal básica
-                with gr.Group():
-                    gr.Markdown("### 👤 **Información Personal**")
-                    self.components['nombre'] = gr.Textbox(
-                        label="Nombre",
-                        placeholder="Tu nombre completo",
-                        elem_id="nombre"
-                    )
-                    self.components['apellidos'] = gr.Textbox(
-                        label="Apellidos", 
-                        placeholder="Tus apellidos",
-                        elem_id="apellidos"
-                    )
-                    self.components['email'] = gr.Textbox(
-                        label="Email",
-                        placeholder="tu.email@ejemplo.com",
-                        elem_id="email"
-                    )
-                    self.components['telefono'] = gr.Textbox(
-                        label="Teléfono",
-                        placeholder="+34 XXX XXX XXX",
-                        elem_id="telefono"
-                    )
-                    self.components['linkedin'] = gr.Textbox(
-                        label="LinkedIn",
-                        placeholder="linkedin.com/in/tu-perfil",
-                        elem_id="linkedin"
-                    )
-                    self.components['ubicacion'] = gr.Textbox(
-                        label="Ubicación",
-                        placeholder="Ciudad, País",
-                        elem_id="ubicacion"
-                    )
-                
-                # Resumen profesional
-                self.components['resumen_profesional'] = RichTextComponent(
-                    label="Resumen Profesional",
-                    placeholder="Breve descripción de tu perfil profesional, objetivos y fortalezas principales...",
-                    info="Resume tu experiencia y objetivos en 2-3 párrafos",
-                    elem_id="resumen_profesional",
-                    lines=4
-                ).render()
-                
-            # Columna central
-            with gr.Column(scale=1):
-                # Experiencia laboral
-                self.components['experiencia'] = RichTextComponent(
-                    label="Experiencia Laboral",
-                    placeholder="• Empresa - Puesto (Año inicio - Año fin)\\n  Descripción de responsabilidades y logros\\n\\n• Otra empresa...",
-                    info="Lista tu experiencia laboral más relevante",
-                    elem_id="experiencia",
-                    lines=6
-                ).render()
-                
-                # Formación académica
-                self.components['formacion'] = RichTextComponent(
-                    label="Formación Académica",
-                    placeholder="• Universidad/Centro - Título (Año)\\n• Certificaciones relevantes\\n• Cursos especializados",
-                    info="Incluye títulos, certificaciones y formación relevante",
-                    elem_id="formacion",
-                    lines=4
-                ).render()
-                
-            # Columna derecha
-            with gr.Column(scale=1):
-                # Habilidades
-                self.components['habilidades'] = RichTextComponent(
-                    label="Habilidades Técnicas y Blandas",
-                    placeholder="• Habilidades técnicas (ej: programación, herramientas)\\n• Habilidades blandas (ej: liderazgo, comunicación)\\n• Competencias específicas del sector",
-                    info="Lista tus principales habilidades y competencias",
-                    elem_id="habilidades",
-                    lines=4
-                ).render()
-                
-                # Idiomas
-                self.components['idiomas'] = RichTextComponent(
-                    label="Idiomas",
-                    placeholder="• Español - Nativo\\n• Inglés - Avanzado (C1)\\n• Francés - Intermedio (B2)",
-                    info="Idiomas y nivel de competencia",
-                    elem_id="idiomas",
-                    lines=3
-                ).render()
-                
-                # Certificaciones
-                self.components['certificaciones'] = RichTextComponent(
-                    label="Certificaciones",
-                    placeholder="• Certificación relevante (Entidad, Año)\\n• Otra certificación...",
-                    info="Certificaciones profesionales obtenidas",
-                    elem_id="certificaciones",
-                    lines=3
-                ).render()
+        return demo
     
-    def _render_action_buttons(self) -> Tuple[gr.Button, gr.Button]:
-        """Renderizar botones de acción"""
-        with gr.Row():
-            with gr.Column(scale=3):
-                generate_btn = gr.Button(
-                    "🎨 Generar CV Profesional",
-                    variant="primary",
-                    size="lg",
-                    elem_id="generate_button",
-                    elem_classes=["generate-btn"]
-                )
-            with gr.Column(scale=1):
-                live_preview_btn = gr.Button(
-                    "👁️ Vista Previa en Vivo",
-                    variant="secondary", 
-                    size="lg",
-                    elem_id="live_preview_toggle",
-                    elem_classes=["preview-btn"]
-                )
+    def _setup_event_handlers(self):
+        """Configurar todos los event handlers de la aplicación"""
         
-        return generate_btn, live_preview_btn
-    
-    def _render_results_area(self) -> Tuple[gr.File, gr.Markdown]:
-        """Renderizar área de resultados"""
-        gr.Markdown("---")
-        gr.HTML("<h2>📄 <strong>Resultado Generado</strong></h2>")
+        # Obtener todos los inputs necesarios para la generación
+        all_inputs = (
+            self.personal_info.get_inputs() +
+            self.experience.get_inputs() +
+            self.skills.get_inputs() +
+            self.ai_config.get_inputs()
+        )
         
-        with gr.Row():
-            with gr.Column(scale=1):
-                pdf_output = gr.File(
-                    label="📄 Tu CV Generado",
-                    file_types=[".pdf"],
-                    interactive=False,
-                    elem_classes=["result-file"]
-                )
-            with gr.Column(scale=1):
-                status_output = gr.Markdown(
-                    value="💡 **Completa el formulario y haz clic en 'Generar CV' para crear tu CV profesional**",
-                    elem_classes=["status-output"]
-                )
-        
-        return pdf_output, status_output
-    
-    def _render_footer(self):
-        """Renderizar footer informativo"""
-        gr.HTML("""
-        <div class="app-footer">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>🚀 CV Generator AI v2.0</h4>
-                    <p>Editor avanzado con componentes modulares</p>
-                </div>
-                <div class="footer-section">
-                    <h4>✨ Características</h4>
-                    <ul>
-                        <li>Editor WYSIWYG completo</li>
-                        <li>Drag & Drop para reordenar</li>
-                        <li>4 plantillas profesionales</li>
-                        <li>Auto-guardado inteligente</li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>🎯 Versión 2.0</h4>
-                    <p>Arquitectura limpia y modular<br>Componentes reutilizables<br>UX mejorada</p>
-                </div>
-            </div>
-        </div>
-        """)
-    
-    def _setup_events(self, generate_btn: gr.Button, live_preview_btn: gr.Button, 
-                     pdf_output: gr.File, status_output: gr.Markdown):
-        """Configurar eventos de la interfaz"""
-        
-        # Evento principal de generación
-        generate_btn.click(
+        # Conectar el botón de generación
+        self.rendered_components['generar_btn'].click(
             fn=self.generate_cv,
-            inputs=self._get_all_inputs(),
-            outputs=[pdf_output, status_output]
-        )
-        
-        # Evento de vista previa en vivo
-        live_preview_state = gr.State(False)
-        
-        def toggle_live_preview(current_state):
-            new_state = not current_state
-            if new_state:
-                return new_state, "🔴 Desactivar Vista Previa", gr.update(js="window.enableLivePreview()")
-            else:
-                return new_state, "👁️ Vista Previa en Vivo", gr.update(js="window.disableLivePreview()")
-        
-        live_preview_btn.click(
-            fn=toggle_live_preview,
-            inputs=[live_preview_state],
-            outputs=[live_preview_state, live_preview_btn, gr.HTML(visible=False)]
-        )
-        
-        # Validaciones en tiempo real
-        self._setup_validations()
-    
-    def _setup_validations(self):
-        """Configurar validaciones en tiempo real"""
-        if 'email' in self.components and 'email_validation' in self.components:
-            self.components['email'].change(
-                fn=self.validate_email_realtime,
-                inputs=[self.components['email']],
-                outputs=[self.components['email_validation']]
-            )
-        
-        if 'telefono' in self.components and 'phone_validation' in self.components:
-            self.components['telefono'].change(
-                fn=self.validate_phone_realtime,
-                inputs=[self.components['telefono']],
-                outputs=[self.components['phone_validation']]
-            )
-        
-        if 'linkedin' in self.components and 'linkedin_validation' in self.components:
-            self.components['linkedin'].change(
-                fn=self.validate_linkedin_realtime,
-                inputs=[self.components['linkedin']],
-                outputs=[self.components['linkedin_validation']]
-            )
-    
-    def _get_all_inputs(self) -> List[gr.components.Component]:
-        """Obtener todos los inputs del formulario"""
-        input_order = [
-            'template', 'nombre', 'apellidos', 'email', 'telefono', 'linkedin', 'ubicacion',
-            'resumen_profesional', 'experiencia', 'formacion', 'habilidades', 
-            'idiomas', 'certificaciones'
-        ]
-        
-        inputs = []
-        for key in input_order:
-            if key in self.components:
-                inputs.append(self.components[key])
-        
-        return inputs
-    
-    def _get_custom_css(self) -> str:
-        """Obtener CSS personalizado completo"""
-        return ADVANCED_CSS + """
-        <style>
-            /* Estilos adicionales específicos de la app */
-            .main-header {
-                text-align: center;
-                padding: 3rem 2rem;
-                background: linear-gradient(135deg, #2563eb, #3b82f6, #6366f1);
-                color: white;
-                border-radius: 12px;
-                margin-bottom: 3rem;
-                box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
-            }
-            
-            .main-header h1 {
-                font-size: 2.5rem;
-                font-weight: 800;
-                margin-bottom: 1rem;
-                letter-spacing: -0.025em;
-            }
-            
-            .main-header p {
-                font-size: 1.125rem;
-                opacity: 0.9;
-                margin-bottom: 1.5rem;
-            }
-            
-            .feature-badges {
-                display: flex;
-                justify-content: center;
-                gap: 12px;
-                flex-wrap: wrap;
-            }
-            
-            .badge {
-                background: rgba(255, 255, 255, 0.2);
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 0.875rem;
-                font-weight: 600;
-                backdrop-filter: blur(10px);
-            }
-            
-            .generate-btn {
-                background: linear-gradient(135deg, #10b981, #059669) !important;
-                font-weight: 600 !important;
-                font-size: 1.1rem !important;
-            }
-            
-            .preview-btn {
-                background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-                color: white !important;
-                font-weight: 600 !important;
-            }
-            
-            .app-footer {
-                margin-top: 4rem;
-                padding: 2rem;
-                background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-                border-radius: 12px;
-                border: 1px solid #e2e8f0;
-            }
-            
-            .footer-content {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 2rem;
-            }
-            
-            .footer-section h4 {
-                color: #1e293b;
-                margin-bottom: 0.5rem;
-                font-weight: 600;
-            }
-            
-            .footer-section p,
-            .footer-section li {
-                color: #64748b;
-                font-size: 0.9rem;
-                line-height: 1.5;
-            }
-            
-            .footer-section ul {
-                list-style: none;
-                padding: 0;
-            }
-            
-            .footer-section li:before {
-                content: "✓ ";
-                color: #10b981;
-                font-weight: bold;
-            }
-            
-            @media (max-width: 768px) {
-                .main-header {
-                    padding: 2rem 1rem;
-                }
-                
-                .main-header h1 {
-                    font-size: 2rem;
-                }
-                
-                .feature-badges {
-                    gap: 8px;
-                }
-                
-                .badge {
-                    font-size: 0.75rem;
-                    padding: 4px 8px;
-                }
-                
-                .footer-content {
-                    grid-template-columns: 1fr;
-                    gap: 1.5rem;
-                }
-            }
-        </style>
-        """
-    
-    # Métodos de validación
-    def validate_email_realtime(self, email: str) -> str:
-        """Validar email en tiempo real"""
-        if not email:
-            return ""
-        import re
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
-        if re.match(pattern, email):
-            return '<div class="validation-feedback success">✅ Email válido</div>'
-        else:
-            return '<div class="validation-feedback error">❌ Formato de email inválido</div>'
-    
-    def validate_phone_realtime(self, phone: str) -> str:
-        """Validar teléfono en tiempo real"""
-        if not phone:
-            return ""
-        import re
-        pattern = r'^(\\+\\d{1,3}[-\\.\\s]?)?\\d{3}[-\\.\\s]?\\d{3}[-\\.\\s]?\\d{3}$'
-        if re.match(pattern, phone.replace(" ", "")):
-            return '<div class="validation-feedback success">✅ Teléfono válido</div>'
-        else:
-            return '<div class="validation-feedback error">❌ Formato de teléfono inválido</div>'
-    
-    def validate_linkedin_realtime(self, linkedin: str) -> str:
-        """Validar LinkedIn en tiempo real"""
-        if not linkedin:
-            return ""
-        import re
-        pattern = r'^(https?://)?(www\\.)?linkedin\\.com/(in|pub)/[a-zA-Z0-9-]+/?$'
-        if re.match(pattern, linkedin):
-            return '<div class="validation-feedback success">✅ LinkedIn válido</div>'
-        else:
-            return '<div class="validation-feedback error">❌ Formato de LinkedIn inválido</div>'
-    
-    def generate_cv(self, *args) -> Tuple[str, str]:
-        """Generar CV con todos los datos del formulario"""
-        try:
-            # Mapear argumentos a campos
-            field_names = [
-                'template', 'nombre', 'apellidos', 'email', 'telefono', 'linkedin', 'ubicacion',
-                'resumen_profesional', 'experiencia', 'formacion', 'habilidades', 
-                'idiomas', 'certificaciones'
+            inputs=all_inputs,
+            outputs=[
+                self.rendered_components['resultado_texto'], 
+                self.rendered_components['archivo_descarga']
             ]
+        )
+        
+        # Configurar validaciones en tiempo real
+        personal_handlers = self.personal_info.get_validation_handlers()
+        for handler_name, handler_config in personal_handlers.items():
+            if 'email_change' in handler_name:
+                self.rendered_components['email'].change(
+                    fn=handler_config['fn'],
+                    inputs=handler_config['inputs'],
+                    outputs=handler_config['outputs']
+                )
+            elif 'phone_change' in handler_name:
+                self.rendered_components['telefono'].change(
+                    fn=handler_config['fn'],
+                    inputs=handler_config['inputs'],
+                    outputs=handler_config['outputs']
+                )
+            elif 'linkedin_change' in handler_name:
+                self.rendered_components['linkedin'].change(
+                    fn=handler_config['fn'],
+                    inputs=handler_config['inputs'],
+                    outputs=handler_config['outputs']
+                )
+        
+        # Configurar handlers de cambio de IA
+        ai_handlers = self.ai_config.get_change_handlers()
+        for handler_name, handler_config in ai_handlers.items():
+            if 'models' in handler_name:
+                self.rendered_components['api_provider'].change(
+                    fn=handler_config['fn'],
+                    inputs=handler_config['inputs'],
+                    outputs=handler_config['outputs']
+                )
+            elif 'key' in handler_name:
+                self.rendered_components['api_provider'].change(
+                    fn=handler_config['fn'],
+                    inputs=handler_config['inputs'],
+                    outputs=handler_config['outputs']
+                )
+        
+        # Configurar vista previa en vivo
+        live_preview_config = self.generation.get_live_preview_handlers()
+        self.rendered_components['live_preview_toggle'].click(
+            fn=live_preview_config['toggle_handler']['fn'],
+            inputs=live_preview_config['toggle_handler']['inputs'],
+            outputs=live_preview_config['toggle_handler']['outputs']
+        )
+    
+    def get_custom_css(self) -> str:
+        """CSS personalizado mejorado combinando estilos base y avanzados"""
+        base_css = """
+        /* Estilos globales */
+        .gradio-container {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Animaciones suaves */
+        .gr-button {
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+        }
+        
+        .gr-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        }
+        
+        /* Botón principal destacado */
+        #generate_button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+        }
+        
+        #generate_button:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+        }
+        
+        /* Campos de entrada mejorados */
+        .gr-textbox, .gr-dropdown {
+            border-radius: 8px !important;
+            border: 2px solid #e5e7eb !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .gr-textbox:focus, .gr-dropdown:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        }
+        
+        /* Grupos y secciones */
+        .gr-group {
+            border-radius: 12px !important;
+            border: 1px solid #e5e7eb !important;
+            padding: 16px !important;
+            margin-bottom: 16px !important;
+            background: #fafafa !important;
+        }
+        
+        /* Validaciones */
+        .validation-success {
+            color: #10b981 !important;
+            background: #ecfdf5 !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            font-size: 0.85rem !important;
+        }
+        
+        .validation-error {
+            color: #ef4444 !important;
+            background: #fef2f2 !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            font-size: 0.85rem !important;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .gradio-container {
+                padding: 0 16px !important;
+            }
             
-            form_data = dict(zip(field_names, args))
+            .gr-row {
+                flex-direction: column !important;
+            }
             
-            # Validar datos
-            is_valid, validation_errors = validate_form_data(form_data)
-            if not is_valid:
-                error_msg = "❌ **Errores de validación:**\\n" + "\\n".join([f"• {error}" for error in validation_errors])
-                return None, error_msg
+            .gr-column {
+                min-width: 100% !important;
+                margin-bottom: 16px !important;
+            }
+        }
+        
+        /* Dark mode compatibility */
+        .dark .gr-group {
+            background: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+        """
+        
+        # Combinar con CSS avanzado si está disponible
+        try:
+            return base_css + "\n" + ADVANCED_CSS
+        except:
+            return base_css
+    
+    def generate_cv(self, nombre: str, email: str, telefono: str, linkedin: str, 
+                   ubicacion: str, template_selector: str, objetivo: str, experiencia_anos: str,
+                   experiencia_laboral: str, educacion: str, habilidades: str,
+                   idiomas: str, certificaciones: str, proyectos: str,
+                   api_provider: str, modelo_seleccionado: str, api_key: str) -> Tuple[str, Optional[str]]:
+        """Generar CV con validaciones y manejo de errores mejorado"""
+        
+        try:
+            # Validaciones básicas
+            if not all([nombre.strip(), email.strip(), telefono.strip()]):
+                return "❌ **Error:** Los campos Nombre, Email y Teléfono son obligatorios.", None
+            
+            # Validaciones de formato
+            if not validate_email(email):
+                return "❌ **Error:** El formato del email no es válido.", None
+            
+            if not validate_phone(telefono):
+                return "❌ **Error:** El formato del teléfono no es válido.", None
+            
+            if linkedin and not validate_linkedin(linkedin):
+                return "❌ **Error:** El formato del LinkedIn no es válido.", None
+            
+            # Configurar el servicio de IA
+            self.ai_service.configure(api_provider, modelo_seleccionado, api_key)
+            
+            # Preparar datos del usuario
+            user_data = {
+                "nombre": clean_text(nombre),
+                "email": clean_text(email),
+                "telefono": clean_text(telefono),
+                "linkedin": clean_text(linkedin) if linkedin else "",
+                "ubicacion": clean_text(ubicacion) if ubicacion else "",
+                "objetivo": clean_text(objetivo) if objetivo else "",
+                "experiencia_anos": experiencia_anos,
+                "experiencia_laboral": clean_text(experiencia_laboral) if experiencia_laboral else "",
+                "educacion": clean_text(educacion) if educacion else "",
+                "habilidades": clean_text(habilidades) if habilidades else "",
+                "idiomas": clean_text(idiomas) if idiomas else "",
+                "certificaciones": clean_text(certificaciones) if certificaciones else "",
+                "proyectos": clean_text(proyectos) if proyectos else ""
+            }
+            
+            # Generar contenido del CV
+            logger.info(f"Generando CV para {nombre} con plantilla {template_selector}")
+            cv_content = self.content_generator.generate_cv_content(
+                user_data, 
+                template_selector, 
+                self.ai_service
+            )
             
             # Generar PDF
-            template = form_data.pop('template', 'modern')
-            pdf_path = self.pdf_generator.create_cv_pdf(form_data, template=template)
+            pdf_path = self.pdf_generator.generate_pdf(cv_content, template_selector, user_data)
             
-            if pdf_path and os.path.exists(pdf_path):
-                success_message = format_success_message(form_data, template)
-                return pdf_path, success_message
-            else:
-                return None, "❌ **Error:** No se pudo generar el archivo PDF"
+            # Autoguardar datos (opcional)
+            if self.autosave_enabled:
+                self.save_user_data(user_data)
+            
+            # Resultado en Markdown para mostrar
+            preview_content = f"""
+# ✅ **CV Generado Exitosamente**
+
+## 📋 **Resumen del CV:**
+- **Nombre:** {nombre}
+- **Plantilla:** {template_selector.title()}
+- **Proveedor IA:** {api_provider}
+- **Modelo:** {modelo_seleccionado}
+
+## 📄 **Vista Previa del Contenido:**
+
+{cv_content[:1000]}...
+
+---
+💡 **Tip:** Tu CV ha sido optimizado automáticamente para sistemas ATS con palabras clave relevantes para tu sector.
+            """
+            
+            return preview_content, pdf_path
+            
+        except Exception as e:
+            logger.error(f"Error generando CV: {str(e)}")
+            error_message = f"""
+❌ **Error generando el CV:**
+
+```
+{str(e)}
+```
+
+🔧 **Posibles soluciones:**
+1. Verifica que todos los campos obligatorios estén completos
+2. Si usas una API externa, verifica tu API key
+3. Intenta con otra plantilla o modelo
+4. Contacta al soporte si el problema persiste
+            """
+            return error_message, None
+    
+    def save_user_data(self, user_data: Dict[str, Any]) -> None:
+        """Guardar datos del usuario para autocompletado futuro"""
+        try:
+            # Crear directorio de datos si no existe
+            data_dir = "data"
+            os.makedirs(data_dir, exist_ok=True)
+            
+            # Guardar datos (sin información sensible)
+            safe_data = {k: v for k, v in user_data.items() if k not in ['email', 'telefono']}
+            
+            with open(os.path.join(data_dir, "last_user_data.json"), 'w', encoding='utf-8') as f:
+                json.dump(safe_data, f, ensure_ascii=False, indent=2)
                 
         except Exception as e:
-            return None, f"❌ **Error inesperado:** {str(e)}"
-    
-    def launch(self, **kwargs):
-        """Lanzar la aplicación"""
-        if not self.interface:
-            self.interface = self.create_interface()
-            
-        default_kwargs = {
-            "server_name": "0.0.0.0",
-            "server_port": 7860,
-            "share": False,
-            "show_error": True,
-            "quiet": False
-        }
-        default_kwargs.update(kwargs)
-        
-        return self.interface.launch(**default_kwargs)
-
-
-def main():
-    """Función principal"""
-    try:
-        print("🚀 Iniciando CV Generator AI v2.0...")
-        print("📋 Nuevas funcionalidades:")
-        print("   • ✏️ Editor WYSIWYG completo")
-        print("   • 🔄 Drag & Drop para reordenar secciones")
-        print("   • 🎨 4 plantillas profesionales mejoradas")
-        print("   • 📱 Diseño responsive optimizado")
-        print("   • 🏗️ Arquitectura limpia y modular")
-        print("   • 💾 Auto-guardado inteligente")
-        
-        app = CVGeneratorApp()
-        app.launch()
-        
-    except Exception as e:
-        print(f"❌ Error al inicializar la aplicación: {e}")
-        import traceback
-        traceback.print_exc()
-
+            logger.warning(f"No se pudo guardar datos del usuario: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Crear y lanzar la aplicación
+    app = CVGeneratorApp()
+    demo = app.create_interface()
+    
+    # Configuración de lanzamiento
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False,
+        debug=True,
+        show_error=True,
+        quiet=False,
+        favicon_path=None,
+        ssl_keyfile=None,
+        ssl_certfile=None,
+        ssl_keyfile_password=None
+    )
