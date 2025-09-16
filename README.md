@@ -1,3 +1,17 @@
+<!-- 
+YAML Metadata for Hugging Face Spaces:
+title: Cv Generator
+emoji: 🔥
+colorFrom: pink
+colorTo: yellow
+sdk: gradio
+sdk_version: 5.45.0
+app_file: app.py
+pinned: false
+license: mit
+short_description: AI Curriculum Vitae Generator
+-->
+
 # Generador Automático de CV y Cartas de Presentación 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
