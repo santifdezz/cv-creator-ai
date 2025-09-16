@@ -10,44 +10,326 @@ import re
 
 class ContentGenerator:
     def __init__(self):
-        self.technical_keywords = [
-            'python', 'java', 'javascript', 'react', 'node', 'sql', 'html', 'css',
-            'angular', 'vue', 'machine learning', 'data', 'analytics', 'programming',
-            'backend', 'frontend', 'fullstack', 'api', 'database', 'cloud', 'aws',
-            'docker', 'kubernetes', 'git', 'linux', 'mongodb', 'postgresql'
-        ]
+        # Palabras clave ATS por sector (expandidas)
+        self.ats_keywords = {
+            "tech": [
+                "JavaScript", "Python", "React", "Node.js", "SQL", "Git", "Docker", "AWS", 
+                "Agile", "Scrum", "API", "REST", "Microservices", "CI/CD", "DevOps",
+                "Machine Learning", "Data Analysis", "Problem Solving", "Team Leadership",
+                "Full Stack", "Frontend", "Backend", "Database Management", "Cloud Computing",
+                "TypeScript", "MongoDB", "PostgreSQL", "Redis", "Kubernetes", "Jenkins",
+                "HTML5", "CSS3", "Vue.js", "Angular", "Express.js", "GraphQL", "NoSQL",
+                "TDD", "Unit Testing", "Integration Testing", "Performance Optimization"
+            ],
+            "marketing": [
+                "Digital Marketing", "SEO", "SEM", "Social Media", "Content Strategy",
+                "Analytics", "Google Analytics", "Campaign Management", "Lead Generation",
+                "Brand Management", "Market Research", "Email Marketing", "CRM",
+                "ROI Optimization", "A/B Testing", "Customer Acquisition", "PPC",
+                "Content Creation", "Influencer Marketing", "Marketing Automation",
+                "Conversion Rate Optimization", "Customer Journey Mapping", "KPI Analysis"
+            ],
+            "sales": [
+                "Sales Management", "Lead Generation", "Customer Relationship Management",
+                "CRM", "Pipeline Management", "Revenue Growth", "Account Management",
+                "Negotiation", "Closing Deals", "B2B Sales", "B2C Sales", "Prospecting",
+                "Sales Forecasting", "Territory Management", "Key Account Management",
+                "Consultative Selling", "Solution Selling", "Customer Retention"
+            ],
+            "design": [
+                "UI Design", "UX Design", "User Experience", "User Interface", "Figma",
+                "Adobe Creative Suite", "Photoshop", "Illustrator", "Sketch", "InVision",
+                "Wireframing", "Prototyping", "User Research", "Design Thinking",
+                "Visual Design", "Interaction Design", "Information Architecture"
+            ],
+            "general": [
+                "Project Management", "Leadership", "Communication", "Problem Solving",
+                "Team Collaboration", "Strategic Planning", "Process Improvement",
+                "Data Analysis", "Customer Service", "Time Management", "Adaptability",
+                "Innovation", "Critical Thinking", "Results-Oriented", "Multi-tasking",
+                "Cross-functional Collaboration", "Stakeholder Management", "Budget Management"
+            ]
+        }
         
-        self.soft_keywords = [
-            'liderazgo', 'comunicación', 'teamwork', 'problem solving', 'adaptability',
-            'creativity', 'negotiation', 'presentation', 'management', 'leadership',
-            'collaboration', 'analytical', 'creative', 'organized', 'proactive'
-        ]
-        
-        self.tools_keywords = [
-            'excel', 'powerpoint', 'word', 'photoshop', 'illustrator', 'figma',
-            'sketch', 'slack', 'trello', 'jira', 'confluence', 'notion', 'tableau',
-            'power bi', 'salesforce', 'hubspot'
-        ]
+        # Plantillas mejoradas con optimización ATS
+        self.enhanced_templates = {
+            "tech": {
+                "summary": """Desarrollador {experience_level} con {years}+ años de experiencia especializado en {tech_skills} y arquitecturas escalables. Expertise comprobado en metodologías Agile/Scrum, desarrollo Full Stack y implementación de soluciones cloud-native. Historial demostrado de liderazgo técnico, optimización de rendimiento y entrega de proyectos de alto impacto en equipos multidisciplinarios.""",
+                
+                "experience_bullets": [
+                    "Desarrollé y mantuve aplicaciones web escalables utilizando {tech_stack}, mejorando el rendimiento del sistema en un 40% y reduciendo los tiempos de carga",
+                    "Implementé arquitecturas de microservicios y APIs RESTful, optimizando la escalabilidad y facilitando la integración con sistemas externos",
+                    "Lideré equipos de desarrollo en metodologías Agile/Scrum, coordinando sprints, daily standups y retrospectivas para maximizar la productividad",
+                    "Aplicé principios de DevOps incluyendo CI/CD pipelines, containerización con Docker y despliegue automatizado en plataformas cloud",
+                    "Mentoricé a desarrolladores junior, establecí estándares de código y lideré code reviews para mantener alta calidad del software"
+                ]
+            },
+            
+            "marketing": {
+                "summary": """Especialista en Marketing Digital con {years}+ años de experiencia en estrategias de crecimiento y optimización ROI. Expertise en SEO/SEM, Social Media Marketing y análisis avanzado de datos con Google Analytics. Historial comprobado de incremento de conversiones (+35%), generación de leads cualificados y gestión exitosa de presupuestos de marketing. Experiencia en liderazgo de equipos creativos y colaboración cross-funcional.""",
+                
+                "experience_bullets": [
+                    "Desarrollé e implementé estrategias de marketing digital omnicanal que incrementaron el tráfico orgánico en un 60% y las conversiones en un 35%",
+                    "Gestioné campañas de SEM y Social Media Advertising con presupuestos de €75K+, optimizando el ROAS y reduciendo el CPA en un 25%",
+                    "Realicé análisis profundo de mercado y segmentación de audiencias para optimizar el targeting y personalizar el customer journey",
+                    "Implementé sistemas de marketing automation y lead scoring que mejoraron la calificación de leads en un 40%",
+                    "Colaboré con equipos de ventas y producto para alinear estrategias go-to-market y optimizar el funnel de conversión"
+                ]
+            },
+            
+            "sales": {
+                "summary": """Profesional de Ventas con {years}+ años de experiencia en gestión de cuentas clave y desarrollo de nuevos mercados. Expertise en consultative selling, negociación estratégica y gestión de pipeline. Historial comprobado de superación de objetivos de ventas (+120% quota achievement), retención de clientes y crecimiento de revenue. Experiencia en CRM management y análisis de métricas de ventas.""",
+                
+                "experience_bullets": [
+                    "Gestioné cartera de cuentas clave generando €2M+ en revenue anual, manteniendo una tasa de retención del 95%",
+                    "Desarrollé nuevos territorios de venta identificando oportunidades de mercado y estableciendo relaciones estratégicas con stakeholders",
+                    "Implementé procesos de sales enablement y metodologías consultivas que incrementaron la tasa de cierre en un 30%",
+                    "Colaboré con equipos de marketing para optimizar lead generation y desarrollar contenido de apoyo a ventas",
+                    "Mentoricé a sales representatives junior y establecí best practices para accelerar el ciclo de ventas"
+                ]
+            }
+        }
 
-    def generate_fallback_content(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Genera contenido de CV optimizado sin usar IA externa
-        """
+    def detect_sector(self, experience_text: str, skills_text: str, objective_text: str = "") -> str:
+        """Detecta el sector profesional basado en experiencia, habilidades y objetivo"""
+        text = f"{experience_text} {skills_text} {objective_text}".lower()
         
-        # Generar resumen profesional
-        resumen = self._generate_professional_summary(form_data)
+        sector_indicators = {
+            "tech": ["programador", "desarrollador", "software", "web", "javascript", "python", 
+                    "react", "api", "backend", "frontend", "fullstack", "devops", "coding"],
+            "marketing": ["marketing", "publicidad", "seo", "sem", "social media", "campañas", 
+                         "digital", "brand", "content", "analytics", "roi"],
+            "sales": ["ventas", "comercial", "account", "cliente", "negociación", "revenue", 
+                     "pipeline", "crm", "prospecting"],
+            "design": ["diseño", "design", "ux", "ui", "figma", "photoshop", "illustrator", 
+                      "creative", "visual", "wireframe", "prototype"]
+        }
         
-        # Procesar experiencia laboral
-        experiencia_optimizada = self._process_work_experience(form_data)
+        sector_scores = {}
+        for sector, indicators in sector_indicators.items():
+            score = sum(1 for indicator in indicators if indicator in text)
+            sector_scores[sector] = score
         
-        # Organizar habilidades
-        habilidades_organizadas = self._organize_skills(form_data)
+        detected_sector = max(sector_scores, key=sector_scores.get)
+        return detected_sector if sector_scores[detected_sector] > 0 else "general"
+
+    def enhance_with_ats_keywords(self, text: str, sector: str) -> str:
+        """Mejora el texto añadiendo palabras clave ATS relevantes de forma natural"""
+        if not text:
+            return text
+            
+        keywords = self.ats_keywords.get(sector, self.ats_keywords["general"])
+        
+        # Convierte texto a lista de palabras para análisis
+        words_in_text = text.lower().split()
+        
+        # Encuentra keywords relevantes que no están en el texto
+        relevant_keywords = []
+        for keyword in keywords[:8]:  # Toma las 8 más relevantes
+            if not any(word in keyword.lower() for word in words_in_text):
+                relevant_keywords.append(keyword)
+        
+        # Si el texto es corto, añade keywords naturalmente
+        if len(text.split()) < 30 and relevant_keywords:
+            enhanced_text = f"{text} Competencias destacadas: {', '.join(relevant_keywords[:4])}."
+            return enhanced_text
+        
+        return text
+
+    def _calculate_years_experience(self, experience_text: str) -> int:
+        """Calcula años de experiencia basado en el texto de experiencia"""
+        if not experience_text:
+            return 1
+            
+        # Busca patrones de fechas
+        year_pattern = r'\b(20\d{2})\b'
+        years = re.findall(year_pattern, experience_text)
+        
+        if len(years) >= 2:
+            years = [int(y) for y in years]
+            return max(years) - min(years)
+        
+        # Fallback: estima basado en cantidad de trabajos
+        jobs = experience_text.split('\n')
+        job_count = len([job for job in jobs if job.strip()])
+        return min(job_count * 2, 8)  # Max 8 años estimados
+
+    def generate_enhanced_cv_content(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Genera contenido de CV optimizado para ATS con detección inteligente de sector"""
+        
+        # Detecta el sector profesional
+        sector = self.detect_sector(
+            form_data.get('experiencia_laboral', ''), 
+            form_data.get('habilidades', ''),
+            form_data.get('objetivo', '')
+        )
+        
+        # Calcula años de experiencia
+        years = self._calculate_years_experience(form_data.get('experiencia_laboral', ''))
+        
+        # Genera contenido usando plantillas específicas del sector
+        if sector in self.enhanced_templates:
+            template = self.enhanced_templates[sector]
+            
+            # Determina nivel de experiencia
+            if years >= 7:
+                experience_level = "Senior"
+            elif years >= 3:
+                experience_level = "Mid-level"
+            else:
+                experience_level = "Junior"
+            
+            # Genera resumen profesional optimizado
+            summary = template["summary"].format(
+                experience_level=experience_level,
+                years=years,
+                tech_skills=form_data.get('habilidades', 'tecnologías modernas')[:50],
+                tech_stack=form_data.get('habilidades', 'stack tecnológico actual')[:40]
+            )
+            
+            # Procesa experiencia laboral con bullets optimizados
+            experience_bullets = template.get("experience_bullets", [])
+            enhanced_experience = self._enhance_experience_with_bullets(
+                form_data.get('experiencia_laboral', ''), 
+                experience_bullets,
+                form_data.get('habilidades', '')
+            )
+            
+        else:
+            # Fallback al método original mejorado
+            summary = self._generate_enhanced_summary(form_data, sector, years)
+            enhanced_experience = self._process_work_experience(form_data)
+        
+        # Optimiza habilidades con keywords ATS
+        enhanced_skills = self._optimize_skills_for_ats(
+            form_data.get('habilidades', ''), sector
+        )
         
         return {
-            "resumen_profesional": resumen,
-            "experiencia_optimizada": experiencia_optimizada,
-            "habilidades_organizadas": habilidades_organizadas
+            'resumen_profesional': summary,
+            'experiencia_optimizada': enhanced_experience,
+            'habilidades_organizadas': enhanced_skills,
+            'sector_detectado': sector,
+            'nivel_experiencia': f"{years} años"
         }
+
+    def _enhance_experience_with_bullets(self, original_experience: str, bullet_templates: List[str], skills: str) -> List[Dict[str, Any]]:
+        """Mejora la experiencia laboral usando bullets optimizados para ATS"""
+        if not original_experience:
+            return []
+        
+        jobs = original_experience.split('\n')
+        enhanced_jobs = []
+        
+        for job in jobs:
+            if not job.strip():
+                continue
+                
+            # Extrae información básica del trabajo
+            parts = job.split(' - ')
+            if len(parts) >= 3:
+                position = parts[0].strip()
+                company = parts[1].strip()
+                period = parts[2].strip()
+                
+                # Selecciona bullets aleatorios y los personaliza
+                selected_bullets = bullet_templates[:3] if bullet_templates else []
+                personalized_bullets = []
+                
+                for bullet in selected_bullets:
+                    # Personaliza el bullet con habilidades del usuario
+                    tech_skills = skills.split(',')[:3] if skills else ['tecnologías modernas']
+                    formatted_bullet = bullet.format(
+                        tech_stack=', '.join([s.strip() for s in tech_skills])
+                    )
+                    personalized_bullets.append(formatted_bullet)
+                
+                enhanced_jobs.append({
+                    "puesto": position,
+                    "empresa": company,
+                    "periodo": period,
+                    "descripcion": personalized_bullets
+                })
+        
+        return enhanced_jobs
+
+    def _optimize_skills_for_ats(self, skills_text: str, sector: str) -> Dict[str, List[str]]:
+        """Optimiza y categoriza las habilidades añadiendo keywords ATS relevantes"""
+        
+        # Obtiene keywords del sector
+        sector_keywords = self.ats_keywords.get(sector, self.ats_keywords["general"])
+        
+        # Procesa habilidades del usuario
+        user_skills = []
+        if skills_text:
+            user_skills = [s.strip() for s in skills_text.split(',') if s.strip()]
+        
+        # Categoriza habilidades
+        technical_skills = []
+        soft_skills = []
+        tools_skills = []
+        
+        # Palabras clave para categorización
+        tech_indicators = ["javascript", "python", "react", "sql", "api", "cloud", "docker", "programming"]
+        soft_indicators = ["leadership", "communication", "teamwork", "management", "analytical"]
+        tools_indicators = ["excel", "photoshop", "figma", "jira", "salesforce", "analytics"]
+        
+        # Categoriza habilidades existentes
+        for skill in user_skills:
+            skill_lower = skill.lower()
+            if any(indicator in skill_lower for indicator in tech_indicators):
+                technical_skills.append(skill)
+            elif any(indicator in skill_lower for indicator in soft_indicators):
+                soft_skills.append(skill)
+            elif any(indicator in skill_lower for indicator in tools_indicators):
+                tools_skills.append(skill)
+            else:
+                technical_skills.append(skill)  # Default a técnicas
+        
+        # Añade keywords ATS relevantes
+        for keyword in sector_keywords:
+            keyword_lower = keyword.lower()
+            
+            # Evita duplicados
+            if not any(keyword_lower in existing.lower() for existing in technical_skills + soft_skills + tools_skills):
+                if any(indicator in keyword_lower for indicator in tech_indicators):
+                    technical_skills.append(keyword)
+                elif any(indicator in keyword_lower for indicator in soft_indicators):
+                    soft_skills.append(keyword)
+                elif any(indicator in keyword_lower for indicator in tools_indicators):
+                    tools_skills.append(keyword)
+                else:
+                    technical_skills.append(keyword)
+        
+        # Limita el número de habilidades por categoría
+        return {
+            "tecnicas": technical_skills[:8],
+            "blandas": soft_skills[:5],
+            "herramientas": tools_skills[:5]
+        }
+
+    def _generate_enhanced_summary(self, form_data: Dict[str, Any], sector: str, years: int) -> str:
+        """Genera un resumen profesional mejorado como fallback"""
+        name = form_data.get('nombre', 'Profesional')
+        experience_level = "Senior" if years >= 7 else "Mid-level" if years >= 3 else "Junior"
+        
+        sector_titles = {
+            "tech": "Desarrollador",
+            "marketing": "Especialista en Marketing", 
+            "sales": "Profesional de Ventas",
+            "design": "Diseñador",
+            "general": "Profesional"
+        }
+        
+        title = sector_titles.get(sector, "Profesional")
+        
+        summary = f"""{title} {experience_level} con {years}+ años de experiencia demostrada en {sector}. 
+        Expertise en resolución de problemas complejos, liderazgo de equipos y entrega de resultados excepcionales. 
+        Historial comprobado de mejora de procesos, optimización de rendimiento y colaboración cross-funcional 
+        en entornos dinámicos y orientados a resultados."""
+        
+        # Añade keywords ATS naturalmente
+        return self.enhance_with_ats_keywords(summary, sector)
 
     def _generate_professional_summary(self, form_data: Dict[str, Any]) -> str:
         """Genera un resumen profesional basado en los datos"""

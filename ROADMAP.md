@@ -84,7 +84,7 @@
 - [ ] **Sugerencias inteligentes**
   - [ ] Detección de gaps en el CV
   - [ ] Sugerencias de mejora
-  - [ ] Optimización ATS automática
+  - [ ] Optimización  automática
 
 ---
 

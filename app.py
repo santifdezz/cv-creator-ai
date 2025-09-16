@@ -19,6 +19,17 @@ class CVGeneratorApp:
     def __init__(self):
         self.ai_service = AIService()
         self.pdf_generator = PDFGenerator()
+    
+    def show_progress(self, message):
+        """Muestra indicador de progreso"""
+        return f"""
+        <div class="progress-container" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 12px; padding: 1rem; text-align: center; margin: 1rem 0;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div style="width: 20px; height: 20px; border: 2px solid #f59e0b; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <strong style="color: #92400e;">{message}</strong>
+            </div>
+        </div>
+        """
         
     async def generate_cv(self, nombre, email, telefono, linkedin, ubicacion, objetivo, 
                          experiencia_anos, experiencia_laboral, educacion, 
@@ -100,60 +111,327 @@ class CVGeneratorApp:
             )
 
     def create_interface(self):
-        """Crea la interfaz de Gradio"""
+        """Crea la interfaz de Gradio con diseño mejorado y optimización móvil"""
+        
+        # CSS mejorado para mejor UX y mobile-first design
+        enhanced_css = """
+        /* Variables CSS para consistencia */
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #f8fafc;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --border-radius: 12px;
+        }
+        
+        /* Contenedor principal optimizado */
+        .gradio-container {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: 20px !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        }
+        
+        /* Header mejorado */
+        .main-header {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .main-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .main-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Botones principales mejorados */
+        .gr-button-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+            border: none !important;
+            border-radius: var(--border-radius) !important;
+            padding: 16px 32px !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-md) !important;
+            text-transform: none !important;
+        }
+        
+        .gr-button-primary:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3) !important;
+        }
+        
+        .gr-button-secondary {
+            background: white !important;
+            border: 2px solid var(--primary-color) !important;
+            color: var(--primary-color) !important;
+            border-radius: var(--border-radius) !important;
+            padding: 12px 24px !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Cards y secciones */
+        .gr-form, .gr-panel {
+            background: white !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--border-radius) !important;
+            padding: 24px !important;
+            margin-bottom: 20px !important;
+            box-shadow: var(--shadow-sm) !important;
+            transition: box-shadow 0.3s ease !important;
+        }
+        
+        .gr-form:hover, .gr-panel:hover {
+            box-shadow: var(--shadow-md) !important;
+        }
+        
+        /* Campos de entrada mejorados */
+        .gr-textbox, .gr-dropdown, .gr-textarea {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .gr-textbox:focus, .gr-dropdown:focus, .gr-textarea:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+            outline: none !important;
+        }
+        
+        /* Labels mejorados */
+        .gr-label {
+            font-weight: 600 !important;
+            color: var(--text-primary) !important;
+            margin-bottom: 8px !important;
+            font-size: 0.95rem !important;
+        }
+        
+        /* Status indicators */
+        .status-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin: 16px 0;
+        }
+        
+        .status-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin: 16px 0;
+        }
+        
+        /* Responsive design - Mobile First */
+        @media (max-width: 768px) {
+            .gradio-container {
+                padding: 12px !important;
+            }
+            
+            .main-header h1 {
+                font-size: 2rem;
+            }
+            
+            .gr-form, .gr-panel {
+                padding: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            
+            .gr-button-primary {
+                width: 100% !important;
+                padding: 16px !important;
+                font-size: 1rem !important;
+            }
+            
+            .gr-textbox, .gr-dropdown, .gr-textarea {
+                padding: 14px !important;
+                font-size: 16px !important; /* Evita zoom en iOS */
+            }
+        }
+        
+        /* Mejoras para tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .gradio-container {
+                padding: 16px !important;
+            }
+        }
+        
+        /* Accordion mejorado */
+        .gr-accordion {
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--border-radius) !important;
+            overflow: hidden !important;
+        }
+        
+        /* Loading states */
+        .gr-loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* File upload mejorado */
+        .gr-file {
+            border: 2px dashed var(--border-color) !important;
+            border-radius: var(--border-radius) !important;
+            padding: 24px !important;
+            text-align: center !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .gr-file:hover {
+            border-color: var(--primary-color) !important;
+            background: rgba(37, 99, 235, 0.05) !important;
+        }
+        
+        /* Progress bar mejorado */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-primary);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            font-size: 0.85rem;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+        
+        /* Animation for progress indicator */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        """
         
         with gr.Blocks(
-            title="Generador Automático de CV con IA",
-            theme=gr.themes.Soft(),
-            css="""
-            .gradio-container {max-width: 1200px !important}
-            .gr-button-primary {background: linear-gradient(45deg, #1e3a8a, #3b82f6) !important}
-            .gr-form {background: #f8fafc !important; padding: 20px !important; border-radius: 10px !important}
-            """
+            title="🤖 Generador Automático de CV con IA",
+            theme=gr.themes.Soft(
+                primary_hue="blue",
+                secondary_hue="gray",
+                neutral_hue="slate",
+                font=gr.themes.GoogleFont("Inter")
+            ),
+            css=enhanced_css,
+            analytics_enabled=False
         ) as iface:
             
-            # Header
-            gr.Markdown("""
-            # 🤖 Generador Automático de CV con IA
-            
-            ### Crea tu currículum profesional en minutos con múltiples opciones de IA
-            
-            Utiliza diferentes proveedores de inteligencia artificial para generar un CV optimizado, profesional y compatible con sistemas ATS.
-            
-            ---
-            """)
-            
+            # Header mejorado con estadísticas
             with gr.Row():
-                # Configuración de IA
-                with gr.Column(scale=1):
+                gr.HTML("""
+                <div class="main-header">
+                    <h1>🤖 Generador Automático de CV con IA</h1>
+                    <p>Crea tu currículum profesional optimizado para ATS en minutos</p>
+                    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold;">8+</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Proveedores IA</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold;">100%</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Compatible ATS</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: bold;">30s</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Tiempo promedio</div>
+                        </div>
+                    </div>
+                </div>
+                """)
+            
+            # Contenido principal con mejor organización
+            with gr.Row(equal_height=False):
+                # Columna izquierda: Configuración IA (30%)
+                with gr.Column(scale=3, min_width=300):
                     gr.Markdown("## 🤖 Configuración de IA")
                     
                     with gr.Group():
-                        gr.Markdown("### Selecciona el Proveedor de IA:")
+                        gr.Markdown("### 🎯 Selecciona tu Proveedor")
                         
-                        # Crear opciones con información sobre costos
+                        # Crear opciones con información visual mejorada
                         provider_choices = []
                         for key, config in API_CONFIGS.items():
                             if config["free"] == True:
                                 status = "🆓 GRATIS"
+                                color = "#10b981"
                             elif config["free"] == "Tier gratuito disponible":
-                                status = "💰 FREEMIUM"  
+                                status = "💰 FREEMIUM"
+                                color = "#f59e0b"
                             else:
                                 status = "💳 DE PAGO"
+                                color = "#ef4444"
                             provider_choices.append((f"{config['name']} - {status}", key))
                         
                         api_provider = gr.Dropdown(
                             choices=provider_choices,
                             value="mock",
                             label="Proveedor de IA",
-                            info="Selecciona el servicio de IA a usar"
+                            info="💡 Recomendamos empezar con Groq (gratis y rápido)",
+                            interactive=True
                         )
                         
                         modelo_seleccionado = gr.Dropdown(
                             choices=list(API_CONFIGS["mock"]["models"].keys()),
-                            value="mock-model",
+                            value="mock-professional",
                             label="Modelo de IA",
-                            info="Modelo específico a utilizar"
+                            info="Elige el modelo que mejor se adapte a tu perfil",
+                            interactive=True
                         )
                         
                         api_key = gr.Textbox(
@@ -161,123 +439,126 @@ class CVGeneratorApp:
                             placeholder="No requerida para el modo simulado",
                             type="password",
                             visible=False,
-                            info="🎭 Modo simulado - no se requiere API key"
-                        )
-                        
-                        # Eventos para actualizar UI dinámicamente
-                        api_provider.change(
-                            fn=self.update_models_dropdown,
-                            inputs=[api_provider],
-                            outputs=[modelo_seleccionado]
-                        )
-                        
-                        api_provider.change(
-                            fn=self.update_api_key_visibility,
-                            inputs=[api_provider],
-                            outputs=[api_key]
+                            info="🎭 Modo simulado - no se requiere API key",
+                            lines=1
                         )
                     
-                    # Información de APIs
-                    with gr.Accordion("ℹ️ Guía de Proveedores de IA", open=False):
-                        gr.Markdown("""
-                        **🆓 OPCIONES GRATUITAS:**
-                        - **🎭 Simulado**: Sin API, usa plantillas optimizadas
-                        - **🏠 Ollama Local**: Instala Ollama en tu PC (totalmente gratis)
-                        - **🤗 Hugging Face**: API gratuita con límites (requiere registro)
-                        
-                        **💰 OPCIONES FREEMIUM:**
-                        - **🚀 Cohere**: Tier gratuito disponible
-                        
-                        **💳 OPCIONES DE PAGO:**
-                        - **🤖 OpenAI**: GPT-3.5/4 (mejor calidad, costo por uso)
-                        - **🧠 Anthropic**: Claude (excelente calidad, costo por uso)
-                        
-                        **🎯 Recomendaciones:**
-                        - Para **pruebas**: Usa modo "Simulado"
-                        - Para **uso gratuito**: Ollama Local o Hugging Face
-                        - Para **mejor calidad**: OpenAI o Anthropic (de pago)
+                    # Información de APIs mejorada
+                    with gr.Accordion("💡 Guía de Proveedores", open=False):
+                        gr.HTML("""
+                        <div style="padding: 16px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px;">
+                            <h4 style="color: #0369a1; margin-top: 0;">🆓 Opciones Gratuitas</h4>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li><strong>🎭 Simulado:</strong> Sin API, usa plantillas optimizadas ATS</li>
+                                <li><strong>⚡ Groq:</strong> Súper rápido y gratuito (recomendado)</li>
+                                <li><strong>🏠 Ollama:</strong> Instala modelos en tu PC (ilimitado)</li>
+                            </ul>
+                            
+                            <h4 style="color: #059669; margin: 16px 0 8px 0;">💳 Opciones Premium</h4>
+                            <ul style="margin: 8px 0; padding-left: 20px;">
+                                <li><strong>🤖 OpenAI:</strong> GPT-4 máxima calidad (~$0.03/CV)</li>
+                                <li><strong>🧠 Claude:</strong> Excelente escritura (~$0.01/CV)</li>
+                            </ul>
+                            
+                            <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-top: 16px;">
+                                <strong>💡 Consejo:</strong> Empieza con <strong>Groq</strong> para pruebas gratuitas
+                            </div>
+                        </div>
                         """)
                 
-                # Formulario de datos personales
-                with gr.Column(scale=2):
-                    gr.Markdown("## 📝 Información Personal *(Obligatorio)*")
+                # Columna central: Formulario principal (50%)
+                with gr.Column(scale=5, min_width=400):
+                    gr.Markdown("## 📝 Tu Información Profesional")
                     
+                    # Información básica
                     with gr.Group():
+                        gr.Markdown("### � **Datos Básicos** *(Obligatorio)*")
+                        
                         nombre = gr.Textbox(
                             label="Nombre Completo *",
-                            placeholder="Juan Pérez García",
-                            info="Tu nombre completo como aparecerá en el CV"
+                            placeholder="Ej: María García López",
+                            info="Tu nombre completo como aparecerá en el CV",
+                            lines=1
                         )
                         
                         with gr.Row():
                             email = gr.Textbox(
                                 label="Email *",
-                                placeholder="juan.perez@email.com",
-                                info="Tu dirección de correo profesional"
+                                placeholder="maria.garcia@email.com",
+                                info="Email profesional preferiblemente",
+                                lines=1
                             )
                             telefono = gr.Textbox(
                                 label="Teléfono *",
                                 placeholder="+34 666 123 456",
-                                info="Número de contacto"
+                                info="Con código de país",
+                                lines=1
                             )
                         
                         with gr.Row():
                             linkedin = gr.Textbox(
                                 label="LinkedIn (Opcional)",
-                                placeholder="linkedin.com/in/juanperez",
-                                info="Tu perfil de LinkedIn"
+                                placeholder="linkedin.com/in/maria-garcia",
+                                info="Solo el nombre de usuario o URL completa",
+                                lines=1
                             )
                             ubicacion = gr.Textbox(
                                 label="Ubicación (Opcional)",
                                 placeholder="Madrid, España",
-                                info="Ciudad y país"
+                                info="Ciudad y país donde resides",
+                                lines=1
                             )
                     
-                    gr.Markdown("## 🎯 Perfil Profesional")
-                    
+                    # Perfil profesional
                     with gr.Group():
+                        gr.Markdown("### 🎯 **Perfil Profesional**")
+                        
                         objetivo = gr.Textbox(
                             label="Objetivo Profesional (Opcional)",
-                            placeholder="Desarrollador Full Stack especializado en React y Node.js",
-                            info="Describe brevemente tu enfoque profesional",
-                            lines=2
+                            placeholder="Ej: Desarrollador Full Stack especializado en React y Node.js buscando liderar equipos de desarrollo en una startup tecnológica",
+                            info="Describe tu objetivo o área de especialización (mejora significativamente el resultado)",
+                            lines=3
                         )
                         
                         experiencia_anos = gr.Dropdown(
-                            choices=["0-1 años", "2-3 años", "4-5 años", "6-10 años", "10+ años"],
+                            choices=["Sin experiencia", "0-1 años", "2-3 años", "4-5 años", "6-10 años", "10+ años"],
                             label="Años de Experiencia (Opcional)",
-                            info="Selecciona tu rango de experiencia"
+                            info="Selecciona tu rango de experiencia profesional",
+                            value="2-3 años"
                         )
                     
-                    gr.Markdown("## 💼 Experiencia y Formación")
-                    
+                    # Experiencia y educación
                     with gr.Group():
+                        gr.Markdown("### 💼 **Experiencia y Formación**")
+                        
                         experiencia_laboral = gr.Textbox(
                             label="Experiencia Laboral (Opcional)",
                             placeholder="""Desarrollador Senior - TechCorp - 2020-2024
-Desarrollador Junior - StartupXYZ - 2018-2020""",
-                            info="Una línea por trabajo: Puesto - Empresa - Período",
-                            lines=5
+Desarrollador Junior - StartupXYZ - 2018-2020
+Becario de Desarrollo - InnovaLab - 2017-2018""",
+                            info="Una línea por trabajo: Puesto - Empresa - Período. Cuanta más información, mejor optimización ATS",
+                            lines=6
                         )
                         
                         educacion = gr.Textbox(
                             label="Educación (Opcional)",
                             placeholder="""Grado en Ingeniería Informática - Universidad Complutense - 2018
-Máster en Desarrollo Web - CEU - 2019""",
-                            info="Una línea por titulación",
-                            lines=3
+Máster en Desarrollo Web - CEU San Pablo - 2019
+Certificación AWS Solutions Architect - 2022""",
+                            info="Una línea por titulación/certificación",
+                            lines=4
                         )
                 
-                # Habilidades y botón de generación
-                with gr.Column(scale=1):
-                    gr.Markdown("## 🔧 Habilidades")
+                # Columna derecha: Habilidades y acción (30%)
+                with gr.Column(scale=3, min_width=300):
+                    gr.Markdown("## 🔧 Habilidades y Competencias")
                     
                     with gr.Group():
                         habilidades = gr.Textbox(
-                            label="Habilidades (Opcional)",
-                            placeholder="JavaScript, React, Node.js, Python, SQL, Git, Liderazgo, Trabajo en equipo",
-                            info="Separadas por comas. La IA las categorizará automáticamente",
-                            lines=4
+                            label="Habilidades Técnicas (Opcional)",
+                            placeholder="JavaScript, React, Node.js, Python, SQL, Git, Docker, AWS, Agile, Scrum",
+                            info="⚡ La IA las categorizará automáticamente y añadirá keywords ATS relevantes",
+                            lines=5
                         )
                         
                         idiomas = gr.Textbox(
@@ -286,28 +567,46 @@ Máster en Desarrollo Web - CEU - 2019""",
 Inglés - Avanzado (C1)
 Francés - Intermedio (B2)""",
                             info="Una línea por idioma con nivel",
-                            lines=3
+                            lines=4
                         )
                     
-                    gr.Markdown("## 🚀 Generar CV")
+                    # Botón de generación destacado
+                    gr.Markdown("### 🚀 **Generar tu CV**")
                     
-                    generar_btn = gr.Button(
-                        "🤖 Generar CV con IA",
-                        variant="primary",
-                        size="lg"
-                    )
+                    with gr.Group():
+                        gr.HTML("""
+                        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #92400e;">🎯 Optimización ATS Automática</div>
+                                <div style="font-size: 0.9rem; color: #a16207; margin-top: 4px;">Palabras clave técnicas añadidas automáticamente según tu sector</div>
+                            </div>
+                        </div>
+                        """)
+                        
+                        generar_btn = gr.Button(
+                            "🤖 Generar CV Profesional",
+                            variant="primary",
+                            size="lg",
+                            scale=1
+                        )
+                        
+                        # Indicador de progreso
+                        progress_html = gr.HTML(visible=False)
             
-            # Área de resultados
+            # Área de resultados mejorada
             gr.Markdown("---")
+            gr.Markdown("## 📄 **Resultado Generado**")
             
             with gr.Row():
-                resultado_texto = gr.Markdown()
+                with gr.Column(scale=2):
+                    resultado_texto = gr.Markdown()
                 
-            with gr.Row():
-                archivo_descarga = gr.File(
-                    label="📄 Descargar CV (PDF)",
-                    visible=True
-                )
+                with gr.Column(scale=1):
+                    archivo_descarga = gr.File(
+                        label="� **Descargar CV (PDF)**",
+                        visible=True,
+                        height=120
+                    )
             
             # Conectar el botón con la función
             generar_btn.click(
@@ -318,6 +617,19 @@ Francés - Intermedio (B2)""",
                     habilidades, idiomas, api_provider, modelo_seleccionado, api_key
                 ],
                 outputs=[resultado_texto, archivo_descarga]
+            )
+            
+            # Event handlers para UI dinámica
+            api_provider.change(
+                fn=self.update_models_dropdown,
+                inputs=[api_provider],
+                outputs=[modelo_seleccionado]
+            )
+            
+            api_provider.change(
+                fn=self.update_api_key_visibility,
+                inputs=[api_provider],
+                outputs=[api_key]
             )
             
             # Información adicional
