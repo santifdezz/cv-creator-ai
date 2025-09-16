@@ -23,7 +23,7 @@ short_description: CVision - AI Curriculum Vitae Generator
 
 Una aplicación web moderna que utiliza **múltiples APIs de inteligencia artificial** para generar currículums profesionales optimizados para ATS (Applicant Tracking Systems). Diseñado con flexibilidad para usar tanto **opciones gratuitas como premium**.
 
-![Screenshot de la aplicación](assets/cvision_in.png)
+![Screenshot de la aplicación](https://github.com/user-attachments/assets/439ea461-8cd7-495a-9bc3-37ad4c651fe3)
 
 ---
 
