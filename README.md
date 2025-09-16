@@ -23,7 +23,7 @@ short_description: CVision - AI Curriculum Vitae Generator
 
 Una aplicación web moderna que utiliza **múltiples APIs de inteligencia artificial** para generar currículums profesionales optimizados para ATS (Applicant Tracking Systems). Diseñado con flexibilidad para usar tanto **opciones gratuitas como premium**.
 
-![Screenshot de la aplicación](https://fpoimg.com/800x400?text=CV+Generator+AI&bg_color=e6e6e6&text_color=1e3a8a)
+![Screenshot de la aplicación](assets/cvision_in.png)
 
 ---
 
@@ -300,19 +300,13 @@ Habilidades: JavaScript, React, Python
 ### Salida Optimizada por IA:
 ```
 🎯 Resumen Profesional:
-"Desarrollador Full Stack con 4+ años de experiencia especializando en tecnologías web modernas. Expertise en JavaScript, React y Python con historial comproba
+"Desarrollador Full Stack con 4+ años de experiencia especializando en tecnologías web modernas. Expertise en JavaScript, React y Python con historial comprobado"
+```
 ---
-## 🛠️ Futuras mejoras
 
-- Añadir plantillas personalizables para CV.
+## 🛠️ ROADMAP
 
-- Integrar validaciones de datos.
-
-- Servicio premium con revisión humana.
-
-- Adaptar CVs para diferentes sectores y ATS.
-
-- Implementar versión multilingüe (español / inglés).
+Ver [`ROADMAP.md`](ROADMAP.md) completo.
 
 ---
 ## 📄 Licencia
