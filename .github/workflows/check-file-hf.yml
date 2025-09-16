@@ -10,7 +10,16 @@ jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     environment: hf
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
       - name: Check large files
         uses: ActionsDesk/lfs-warning@v2.0
         with:
