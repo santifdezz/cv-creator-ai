@@ -107,97 +107,122 @@ class CVGeneratorApp:
         with gr.Row():
             # Columna izquierda
             with gr.Column(scale=1):
-                # Información personal básica
-                with gr.Group():
-                    gr.Markdown("### 👤 **Información Personal**")
-                    self.components['nombre'] = gr.Textbox(
-                        label="Nombre",
-                        placeholder="Tu nombre completo",
-                        elem_id="nombre"
-                    )
-                    self.components['apellidos'] = gr.Textbox(
-                        label="Apellidos", 
-                        placeholder="Tus apellidos",
-                        elem_id="apellidos"
-                    )
-                    self.components['email'] = gr.Textbox(
-                        label="Email",
-                        placeholder="tu.email@ejemplo.com",
-                        elem_id="email"
-                    )
-                    self.components['telefono'] = gr.Textbox(
-                        label="Teléfono",
-                        placeholder="+34 XXX XXX XXX",
-                        elem_id="telefono"
-                    )
-                    self.components['linkedin'] = gr.Textbox(
-                        label="LinkedIn",
-                        placeholder="linkedin.com/in/tu-perfil",
-                        elem_id="linkedin"
-                    )
-                    self.components['ubicacion'] = gr.Textbox(
-                        label="Ubicación",
-                        placeholder="Ciudad, País",
-                        elem_id="ubicacion"
-                    )
+                # Información personal en sección arrastrable
+                personal_info_content = PersonalInfoComponent()
+                personal_section = DraggableSectionComponent(
+                    section_id="personal_info",
+                    title="Información Personal", 
+                    icon="👤",
+                    content_component=personal_info_content
+                )
+                personal_components = personal_section.render()
+                self.components.update(personal_components)
                 
-                # Resumen profesional
-                self.components['resumen_profesional'] = RichTextComponent(
+                # Resumen profesional con editor WYSIWYG
+                resumen_content = RichTextComponent(
                     label="Resumen Profesional",
                     placeholder="Breve descripción de tu perfil profesional, objetivos y fortalezas principales...",
                     info="Resume tu experiencia y objetivos en 2-3 párrafos",
                     elem_id="resumen_profesional",
                     lines=4
-                ).render()
+                )
+                resumen_section = DraggableSectionComponent(
+                    section_id="resumen",
+                    title="Resumen Profesional",
+                    icon="📝", 
+                    content_component=resumen_content
+                )
+                resumen_component = resumen_section.render()
+                self.components['resumen_profesional'] = resumen_component
                 
             # Columna central
             with gr.Column(scale=1):
-                # Experiencia laboral
-                self.components['experiencia'] = RichTextComponent(
+                # Experiencia laboral con editor WYSIWYG
+                experiencia_content = RichTextComponent(
                     label="Experiencia Laboral",
                     placeholder="• Empresa - Puesto (Año inicio - Año fin)\\n  Descripción de responsabilidades y logros\\n\\n• Otra empresa...",
                     info="Lista tu experiencia laboral más relevante",
                     elem_id="experiencia",
                     lines=6
-                ).render()
+                )
+                experiencia_section = DraggableSectionComponent(
+                    section_id="experiencia",
+                    title="Experiencia Laboral",
+                    icon="💼",
+                    content_component=experiencia_content
+                )
+                experiencia_component = experiencia_section.render()
+                self.components['experiencia'] = experiencia_component
                 
-                # Formación académica
-                self.components['formacion'] = RichTextComponent(
+                # Formación académica con editor WYSIWYG  
+                formacion_content = RichTextComponent(
                     label="Formación Académica",
                     placeholder="• Universidad/Centro - Título (Año)\\n• Certificaciones relevantes\\n• Cursos especializados",
                     info="Incluye títulos, certificaciones y formación relevante",
                     elem_id="formacion",
                     lines=4
-                ).render()
+                )
+                formacion_section = DraggableSectionComponent(
+                    section_id="formacion",
+                    title="Formación Académica",
+                    icon="🎓",
+                    content_component=formacion_content
+                )
+                formacion_component = formacion_section.render()
+                self.components['formacion'] = formacion_component
                 
             # Columna derecha
             with gr.Column(scale=1):
-                # Habilidades
-                self.components['habilidades'] = RichTextComponent(
+                # Habilidades con editor WYSIWYG
+                habilidades_content = RichTextComponent(
                     label="Habilidades Técnicas y Blandas",
                     placeholder="• Habilidades técnicas (ej: programación, herramientas)\\n• Habilidades blandas (ej: liderazgo, comunicación)\\n• Competencias específicas del sector",
                     info="Lista tus principales habilidades y competencias",
                     elem_id="habilidades",
                     lines=4
-                ).render()
+                )
+                habilidades_section = DraggableSectionComponent(
+                    section_id="habilidades",
+                    title="Habilidades y Competencias",
+                    icon="🎯",
+                    content_component=habilidades_content
+                )
+                habilidades_component = habilidades_section.render()
+                self.components['habilidades'] = habilidades_component
                 
                 # Idiomas
-                self.components['idiomas'] = RichTextComponent(
+                idiomas_content = RichTextComponent(
                     label="Idiomas",
                     placeholder="• Español - Nativo\\n• Inglés - Avanzado (C1)\\n• Francés - Intermedio (B2)",
                     info="Idiomas y nivel de competencia",
                     elem_id="idiomas",
                     lines=3
-                ).render()
+                )
+                idiomas_section = DraggableSectionComponent(
+                    section_id="idiomas",
+                    title="Idiomas",
+                    icon="🌍",
+                    content_component=idiomas_content
+                )
+                idiomas_component = idiomas_section.render()
+                self.components['idiomas'] = idiomas_component
                 
                 # Certificaciones
-                self.components['certificaciones'] = RichTextComponent(
+                certificaciones_content = RichTextComponent(
                     label="Certificaciones",
                     placeholder="• Certificación relevante (Entidad, Año)\\n• Otra certificación...",
                     info="Certificaciones profesionales obtenidas",
                     elem_id="certificaciones",
                     lines=3
-                ).render()
+                )
+                certificaciones_section = DraggableSectionComponent(
+                    section_id="certificaciones",
+                    title="Certificaciones",
+                    icon="🏆",
+                    content_component=certificaciones_content
+                )
+                certificaciones_component = certificaciones_section.render()
+                self.components['certificaciones'] = certificaciones_component
     
     def _render_action_buttons(self) -> Tuple[gr.Button, gr.Button]:
         """Renderizar botones de acción"""

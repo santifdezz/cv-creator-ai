@@ -257,12 +257,12 @@ ollama pull neural-chat   # Especializado en chat
 ### Docker
 ```bash
 # Construir imagen
-docker build -t cv-generator-ai .
+docker build -t cvision .
 
 # Ejecutar contenedor
 docker run -p 7860:7860 \
   -e GROQ_API_KEY=tu-key \
-  cv-generator-ai
+  cvision
 ```
 
 ### Vercel/Netlify
