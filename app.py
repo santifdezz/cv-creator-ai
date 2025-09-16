@@ -552,6 +552,321 @@ class CVGeneratorApp:
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* =============================================================================
+           WYSIWYG EDITOR STYLES - INTEGRATED
+        ============================================================================= */
+        
+        .wysiwyg-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+        
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 8px;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .toolbar-group:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+        
+        .toolbar-btn {
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-primary);
+            transition: var(--transition);
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        
+        .toolbar-btn:hover {
+            background: var(--background-color);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+        
+        .toolbar-btn:active,
+        .toolbar-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .wysiwyg-container {
+            position: relative;
+            margin-top: 8px;
+        }
+        
+        .wysiwyg-editor {
+            padding: 16px;
+            background: var(--surface-color);
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+            outline: none;
+            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            margin-top: -1px;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        .wysiwyg-editor:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .wysiwyg-editor:empty:before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+            font-style: italic;
+            pointer-events: none;
+        }
+        
+        .wysiwyg-editor p {
+            margin: 0 0 8px 0;
+        }
+        
+        .wysiwyg-editor p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .wysiwyg-editor ul,
+        .wysiwyg-editor ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        
+        .wysiwyg-editor li {
+            margin: 4px 0;
+        }
+        
+        .wysiwyg-editor strong {
+            font-weight: 600;
+        }
+        
+        .wysiwyg-editor em {
+            font-style: italic;
+        }
+        
+        .wysiwyg-editor u {
+            text-decoration: underline;
+        }
+        
+        /* =============================================================================
+           DRAG AND DROP STYLES - INTEGRATED
+        ============================================================================= */
+        
+        .draggable-section {
+            background: var(--surface-color) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--border-radius) !important;
+            margin-bottom: 16px !important;
+            overflow: hidden !important;
+            transition: var(--transition) !important;
+            position: relative !important;
+        }
+        
+        .draggable-section.dragging {
+            opacity: 0.5 !important;
+            transform: rotate(2deg) !important;
+            box-shadow: var(--shadow-lg) !important;
+            z-index: 1000 !important;
+        }
+        
+        .draggable-section.drag-over {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--background-color), #f1f5f9);
+            border-bottom: 1px solid var(--border-color);
+            cursor: move;
+            user-select: none;
+            transition: var(--transition);
+        }
+        
+        .section-header:hover {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        }
+        
+        .section-header.dragging {
+            cursor: grabbing;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .drag-icon {
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: grab;
+            opacity: 0.6;
+            transition: var(--transition);
+        }
+        
+        .section-header:hover .drag-icon {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+        
+        .section-icon {
+            font-size: 18px;
+        }
+        
+        .collapse-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+        
+        .collapse-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+        
+        .collapse-btn span {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .collapse-btn.collapsed span {
+            transform: rotate(-90deg);
+        }
+        
+        .section-content {
+            padding: 20px !important;
+            transition: var(--transition) !important;
+        }
+        
+        .section-content.collapsed {
+            display: none !important;
+        }
+        
+        .drag-placeholder {
+            height: 60px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.05));
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: 500;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: var(--transition);
+        }
+        
+        .drag-placeholder.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* Enhanced section styling */
+        .enhanced-section {
+            position: relative;
+        }
+        
+        .enhanced-section .group {
+            border: 2px solid var(--border-color) !important;
+            border-radius: var(--border-radius-lg) !important;
+            overflow: visible !important;
+        }
+        
+        .enhanced-section h3 {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6) !important;
+            color: white !important;
+            margin: -24px -24px 20px -24px !important;
+            padding: 16px 24px !important;
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+            position: relative !important;
+        }
+        
+        .enhanced-section h3:after {
+            content: '⋮⋮';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.7;
+            font-size: 14px;
+            cursor: grab;
+        }
+        
+        /* Mobile optimizations for new components */
+        @media (max-width: 768px) {
+            .wysiwyg-toolbar {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+            
+            .toolbar-btn {
+                min-width: 28px;
+                height: 28px;
+                font-size: 11px;
+                padding: 4px 6px;
+            }
+            
+            .wysiwyg-editor {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            .section-header {
+                padding: 12px 16px;
+            }
+            
+            .section-title {
+                font-size: 14px;
+                gap: 8px;
+            }
+            
+            .drag-icon {
+                font-size: 12px;
+            }
+        }
         """
         
         with gr.Blocks(
@@ -957,6 +1272,436 @@ Francés - Intermedio (B2)""",
             # Auto-save notification
             gr.HTML("""
             <script>
+            // =============================================================================
+            // WYSIWYG EDITOR AND DRAG-DROP FUNCTIONALITY - INTEGRATED
+            // =============================================================================
+            
+            // WYSIWYG Editor Class
+            class WYSIWYGEditor {
+                constructor(container) {
+                    this.container = container;
+                    this.editor = null;
+                    this.toolbar = null;
+                    this.init();
+                }
+                
+                init() {
+                    this.createToolbar();
+                    this.createEditor();
+                    this.attachEvents();
+                }
+                
+                createToolbar() {
+                    this.toolbar = document.createElement('div');
+                    this.toolbar.className = 'wysiwyg-toolbar';
+                    this.toolbar.innerHTML = `
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" data-command="bold" title="Negrita">
+                                <strong>B</strong>
+                            </button>
+                            <button class="toolbar-btn" data-command="italic" title="Cursiva">
+                                <em>I</em>
+                            </button>
+                            <button class="toolbar-btn" data-command="underline" title="Subrayado">
+                                <u>U</u>
+                            </button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" data-command="insertOrderedList" title="Lista numerada">
+                                1.
+                            </button>
+                            <button class="toolbar-btn" data-command="insertUnorderedList" title="Lista con viñetas">
+                                •
+                            </button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" data-command="undo" title="Deshacer">
+                                ↶
+                            </button>
+                            <button class="toolbar-btn" data-command="redo" title="Rehacer">
+                                ↷
+                            </button>
+                        </div>
+                    `;
+                    this.container.appendChild(this.toolbar);
+                }
+                
+                createEditor() {
+                    this.editor = document.createElement('div');
+                    this.editor.className = 'wysiwyg-editor';
+                    this.editor.contentEditable = true;
+                    this.editor.setAttribute('data-placeholder', 'Escribe aquí...');
+                    this.container.appendChild(this.editor);
+                }
+                
+                attachEvents() {
+                    // Toolbar button events
+                    this.toolbar.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('toolbar-btn')) {
+                            e.preventDefault();
+                            const command = e.target.getAttribute('data-command');
+                            this.executeCommand(command);
+                        }
+                    });
+                    
+                    // Editor events
+                    this.editor.addEventListener('input', () => {
+                        this.updateToolbarState();
+                        this.syncWithGradio();
+                    });
+                    
+                    this.editor.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                            switch(e.key) {
+                                case 'b':
+                                    e.preventDefault();
+                                    this.executeCommand('bold');
+                                    break;
+                                case 'i':
+                                    e.preventDefault();
+                                    this.executeCommand('italic');
+                                    break;
+                                case 'u':
+                                    e.preventDefault();
+                                    this.executeCommand('underline');
+                                    break;
+                            }
+                        }
+                    });
+                }
+                
+                executeCommand(command) {
+                    document.execCommand(command, false, null);
+                    this.editor.focus();
+                    this.updateToolbarState();
+                    this.syncWithGradio();
+                }
+                
+                updateToolbarState() {
+                    const buttons = this.toolbar.querySelectorAll('.toolbar-btn');
+                    buttons.forEach(button => {
+                        const command = button.getAttribute('data-command');
+                        if (['bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList'].includes(command)) {
+                            if (document.queryCommandState(command)) {
+                                button.classList.add('active');
+                            } else {
+                                button.classList.remove('active');
+                            }
+                        }
+                    });
+                }
+                
+                syncWithGradio() {
+                    // Find associated Gradio textarea and update it
+                    const textarea = this.container.parentElement.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = this.getPlainText();
+                        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+                
+                getPlainText() {
+                    return this.editor.innerText || '';
+                }
+                
+                getHTML() {
+                    return this.editor.innerHTML;
+                }
+                
+                setContent(content) {
+                    this.editor.innerHTML = content;
+                }
+            }
+            
+            // Drag and Drop Manager Class
+            class DragDropManager {
+                constructor() {
+                    this.sections = [];
+                    this.draggedElement = null;
+                    this.placeholder = null;
+                    this.init();
+                }
+                
+                init() {
+                    this.createSections();
+                    this.attachEvents();
+                    this.loadSectionOrder();
+                }
+                
+                createSections() {
+                    // Find all section containers
+                    const containers = document.querySelectorAll('.gradio-group, .gradio-accordion');
+                    containers.forEach((container, index) => {
+                        if (this.shouldMakeDraggable(container)) {
+                            this.enhanceSection(container, index);
+                        }
+                    });
+                }
+                
+                shouldMakeDraggable(element) {
+                    // Only make sections draggable if they contain form elements
+                    return element.querySelector('input, textarea, select') !== null;
+                }
+                
+                enhanceSection(container, index) {
+                    if (container.classList.contains('enhanced-section')) return;
+                    
+                    container.classList.add('enhanced-section', 'draggable-section');
+                    container.setAttribute('data-section-id', index);
+                    
+                    // Create section header
+                    const header = document.createElement('div');
+                    header.className = 'section-header';
+                    header.innerHTML = `
+                        <div class="section-title">
+                            <span class="drag-icon">⋮⋮</span>
+                            <span class="section-icon">${this.getSectionIcon(container)}</span>
+                            <span>${this.getSectionTitle(container)}</span>
+                        </div>
+                        <button class="collapse-btn" type="button">
+                            <span>▼</span>
+                        </button>
+                    `;
+                    
+                    // Wrap content
+                    const content = document.createElement('div');
+                    content.className = 'section-content';
+                    while (container.firstChild) {
+                        content.appendChild(container.firstChild);
+                    }
+                    
+                    container.appendChild(header);
+                    container.appendChild(content);
+                    
+                    this.sections.push({
+                        element: container,
+                        header: header,
+                        content: content,
+                        id: index,
+                        collapsed: false
+                    });
+                }
+                
+                getSectionIcon(container) {
+                    const text = container.textContent.toLowerCase();
+                    if (text.includes('personal') || text.includes('contacto')) return '👤';
+                    if (text.includes('experiencia') || text.includes('trabajo')) return '💼';
+                    if (text.includes('educación') || text.includes('formación')) return '🎓';
+                    if (text.includes('habilidades') || text.includes('skills')) return '🔧';
+                    if (text.includes('idiomas') || text.includes('languages')) return '🌐';
+                    if (text.includes('certificaciones') || text.includes('certificados')) return '📜';
+                    return '📄';
+                }
+                
+                getSectionTitle(container) {
+                    const label = container.querySelector('label');
+                    if (label) return label.textContent.trim();
+                    
+                    const heading = container.querySelector('h1, h2, h3, h4, h5, h6');
+                    if (heading) return heading.textContent.trim();
+                    
+                    return 'Sección';
+                }
+                
+                attachEvents() {
+                    document.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                    document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                    document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                    document.addEventListener('click', this.handleClick.bind(this));
+                }
+                
+                handleMouseDown(e) {
+                    const header = e.target.closest('.section-header');
+                    if (!header || e.target.closest('.collapse-btn')) return;
+                    
+                    this.draggedElement = header.parentElement;
+                    this.draggedElement.classList.add('dragging');
+                    header.classList.add('dragging');
+                    
+                    this.createPlaceholder();
+                    e.preventDefault();
+                }
+                
+                handleMouseMove(e) {
+                    if (!this.draggedElement) return;
+                    
+                    const sections = document.querySelectorAll('.draggable-section:not(.dragging)');
+                    let targetSection = null;
+                    let insertAfter = false;
+                    
+                    sections.forEach(section => {
+                        const rect = section.getBoundingClientRect();
+                        const centerY = rect.top + rect.height / 2;
+                        
+                        if (e.clientY < centerY && e.clientY > rect.top) {
+                            targetSection = section;
+                            insertAfter = false;
+                        } else if (e.clientY > centerY && e.clientY < rect.bottom) {
+                            targetSection = section;
+                            insertAfter = true;
+                        }
+                    });
+                    
+                    this.updatePlaceholder(targetSection, insertAfter);
+                }
+                
+                handleMouseUp(e) {
+                    if (!this.draggedElement) return;
+                    
+                    this.completeDrop();
+                    this.draggedElement.classList.remove('dragging');
+                    this.draggedElement.querySelector('.section-header').classList.remove('dragging');
+                    this.draggedElement = null;
+                    this.removePlaceholder();
+                    
+                    this.saveSectionOrder();
+                }
+                
+                handleClick(e) {
+                    const collapseBtn = e.target.closest('.collapse-btn');
+                    if (collapseBtn) {
+                        e.preventDefault();
+                        this.toggleSection(collapseBtn);
+                    }
+                }
+                
+                createPlaceholder() {
+                    this.placeholder = document.createElement('div');
+                    this.placeholder.className = 'drag-placeholder';
+                    this.placeholder.textContent = 'Suelta aquí';
+                }
+                
+                updatePlaceholder(targetSection, insertAfter) {
+                    if (!targetSection) {
+                        this.removePlaceholder();
+                        return;
+                    }
+                    
+                    this.placeholder.classList.add('active');
+                    
+                    if (insertAfter) {
+                        targetSection.parentNode.insertBefore(this.placeholder, targetSection.nextSibling);
+                    } else {
+                        targetSection.parentNode.insertBefore(this.placeholder, targetSection);
+                    }
+                }
+                
+                completeDrop() {
+                    if (this.placeholder && this.placeholder.parentNode) {
+                        this.placeholder.parentNode.insertBefore(this.draggedElement, this.placeholder);
+                    }
+                }
+                
+                removePlaceholder() {
+                    if (this.placeholder && this.placeholder.parentNode) {
+                        this.placeholder.parentNode.removeChild(this.placeholder);
+                    }
+                }
+                
+                toggleSection(button) {
+                    const section = button.closest('.draggable-section');
+                    const content = section.querySelector('.section-content');
+                    const icon = button.querySelector('span');
+                    
+                    if (content.classList.contains('collapsed')) {
+                        content.classList.remove('collapsed');
+                        button.classList.remove('collapsed');
+                        icon.textContent = '▼';
+                    } else {
+                        content.classList.add('collapsed');
+                        button.classList.add('collapsed');
+                        icon.textContent = '▶';
+                    }
+                }
+                
+                saveSectionOrder() {
+                    const order = Array.from(document.querySelectorAll('.draggable-section')).map(section => 
+                        section.getAttribute('data-section-id')
+                    );
+                    localStorage.setItem('cv_section_order', JSON.stringify(order));
+                }
+                
+                loadSectionOrder() {
+                    try {
+                        const savedOrder = localStorage.getItem('cv_section_order');
+                        if (savedOrder) {
+                            const order = JSON.parse(savedOrder);
+                            this.applySectionOrder(order);
+                        }
+                    } catch (error) {
+                        console.error('Error loading section order:', error);
+                    }
+                }
+                
+                applySectionOrder(order) {
+                    const container = document.querySelector('.gradio-container');
+                    if (!container) return;
+                    
+                    order.forEach(sectionId => {
+                        const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+                        if (section) {
+                            container.appendChild(section);
+                        }
+                    });
+                }
+            }
+            
+            // Enhanced initialization
+            function initializeEnhancements() {
+                // Initialize WYSIWYG editors
+                const textareas = document.querySelectorAll('textarea[placeholder*="experiencia"], textarea[placeholder*="descripción"], textarea[placeholder*="objetivo"]');
+                textareas.forEach(textarea => {
+                    if (!textarea.parentElement.querySelector('.wysiwyg-toolbar')) {
+                        const container = document.createElement('div');
+                        container.className = 'wysiwyg-container';
+                        textarea.parentElement.insertBefore(container, textarea);
+                        textarea.style.display = 'none'; // Hide original textarea
+                        
+                        const editor = new WYSIWYGEditor(container);
+                        editor.setContent(textarea.value);
+                    }
+                });
+                
+                // Initialize drag and drop
+                if (!window.dragDropManager) {
+                    window.dragDropManager = new DragDropManager();
+                }
+                
+                console.log('✅ Enhanced UI components initialized');
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initializeEnhancements, 2000);
+                });
+            } else {
+                setTimeout(initializeEnhancements, 2000);
+            }
+            
+            // Re-initialize when content changes
+            const observer = new MutationObserver((mutations) => {
+                let shouldReinit = false;
+                mutations.forEach((mutation) => {
+                    if (mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === 1 && (node.querySelector('textarea') || node.classList.contains('gradio-group'))) {
+                                shouldReinit = true;
+                            }
+                        });
+                    }
+                });
+                
+                if (shouldReinit) {
+                    setTimeout(initializeEnhancements, 1000);
+                }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
             // Enhanced Auto-save functionality for CV Generator
             (function() {
                 const STORAGE_KEY = 'cv_generator_autosave';

@@ -286,7 +286,6 @@ class TechnicalTemplate(CVTemplate):
         return []
 
 class PDFGenerator:
-class PDFGenerator:
     """Generador principal de PDFs con soporte para múltiples plantillas"""
     
     def __init__(self):
