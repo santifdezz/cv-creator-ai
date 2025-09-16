@@ -1,5 +1,5 @@
 """
-UI Components Module for CV Generator
+UI Components Module for CVisionAI
 Componentes modulares y reutilizables para la interfaz de usuario
 """
 

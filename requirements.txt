@@ -1,5 +1,5 @@
 # ===============================================
-# DEPENDENCIAS PRINCIPALES - CV GENERATOR AI
+# DEPENDENCIAS PRINCIPALES - CVisionAI
 # ===============================================
 
 # 🎨 Interfaz web

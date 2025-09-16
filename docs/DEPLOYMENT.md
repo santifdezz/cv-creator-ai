@@ -1,6 +1,6 @@
-# 🚀 Guía de Despliegue - CV Generator AI
+# 🚀 Guía de Despliegue - CVisionAI
 
-Esta guía cubre las diferentes opciones para desplegar tu aplicación CV Generator AI en producción.
+Esta guía cubre las diferentes opciones para desplegar tu aplicación CVisionAI en producción.
 
 ## 🎯 Opciones de Despliegue
 
@@ -21,13 +21,13 @@ Hugging Face Spaces es la opción más fácil y gratuita para desplegar aplicaci
    - Ve a [huggingface.co/spaces](https://huggingface.co/spaces)
    - Click "Create new Space"
    - Selecciona "Gradio" como SDK
-   - Elige un nombre descriptivo (ej: `cv-generator-ai`)
+   - Elige un nombre descriptivo (ej: `cvision`)
 
 2. **Configurar el repositorio:**
    ```bash
    # Clonar el space
-   git clone https://huggingface.co/spaces/tu-usuario/cv-generator-ai
-   cd cv-generator-ai
+   git clone https://huggingface.co/spaces/tu-usuario/cvision
+   cd cvision
    
    # Copiar archivos del proyecto (excluyendo .venv, __pycache__, etc)
    cp -r /path/to/your/project/* .
@@ -55,7 +55,7 @@ Hugging Face Spaces es la opción más fácil y gratuita para desplegar aplicaci
    ```
 
 5. **¡Listo!** Tu app estará disponible en:
-   `https://huggingface.co/spaces/tu-usuario/cv-generator-ai`
+   `https://huggingface.co/spaces/tu-usuario/cvision`
 
 ---
 
@@ -66,13 +66,13 @@ Ideal si tienes tu propio servidor o quieres más control.
 #### **Construcción local:**
 ```bash
 # Construir imagen
-docker build -t cv-generator-ai .
+docker build -t cvision .
 
 # Ejecutar contenedor
 docker run -p 7860:7860 \
   -e GROQ_API_KEY=tu-key \
   -e OPENAI_API_KEY=tu-key \
-  cv-generator-ai
+  cvision
 ```
 
 #### **Docker Compose (recomendado):**
@@ -185,7 +185,7 @@ az group create --name cv-generator-rg --location eastus
 az container create \
   --resource-group cv-generator-rg \
   --name cv-generator \
-  --image tu-registro/cv-generator-ai:latest \
+  --image tu-registro/cvision:latest \
   --ports 7860 \
   --environment-variables \
     GROQ_API_KEY=tu-key \
@@ -200,13 +200,13 @@ Para despliegues enterprise en AWS:
 
 1. **Crear ECR repository:**
    ```bash
-   aws ecr create-repository --repository-name cv-generator-ai
+   aws ecr create-repository --repository-name cvision
    ```
 
 2. **Subir imagen:**
    ```bash
-   docker tag cv-generator-ai:latest your-account.dkr.ecr.region.amazonaws.com/cv-generator-ai:latest
-   docker push your-account.dkr.ecr.region.amazonaws.com/cv-generator-ai:latest
+   docker tag cvision:latest your-account.dkr.ecr.region.amazonaws.com/cvision:latest
+   docker push your-account.dkr.ecr.region.amazonaws.com/cvision:latest
    ```
 
 3. **Crear task definition y service** usando la consola de AWS ECS

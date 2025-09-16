@@ -1,5 +1,5 @@
 """
-Estilos CSS para componentes avanzados del CV Generator
+Estilos CSS para componentes avanzados del CVisionAI
 Incluye estilos para WYSIWYG, drag-and-drop, y componentes modulares
 """
 

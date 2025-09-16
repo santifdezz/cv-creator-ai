@@ -1,4 +1,4 @@
-# 🎯 Roadmap de Mejoras - CV Generator AI
+# 🎯 Roadmap de Mejoras - CVisionAI
 
 ## 📋 MVP Completado ✅
 

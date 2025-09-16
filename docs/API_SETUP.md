@@ -1,6 +1,6 @@
 # 🤖 Guía de Configuración de APIs
 
-Esta guía te ayudará a configurar las diferentes APIs de IA disponibles en el CV Generator AI.
+Esta guía te ayudará a configurar las diferentes APIs de IA disponibles en el CVisionAI.
 
 ## 🆓 APIs Gratuitas (Recomendadas para empezar)
 
