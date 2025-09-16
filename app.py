@@ -1136,35 +1136,47 @@ Francés - Intermedio (B2)""",
                 with gr.Column(scale=3, min_width=300):
                     gr.Markdown("## � Generar tu CV")
                     
-                    with gr.Group():
-                        gr.HTML("""
-                        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: #92400e;">🎯 Optimización ATS Automática</div>
-                                <div style="font-size: 0.9rem; color: #a16207; margin-top: 4px;">Palabras clave técnicas añadidas automáticamente según tu sector</div>
-                            </div>
+                    # Información de ATS y botones consolidados
+                    gr.HTML("""
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #92400e;">🎯 Optimización ATS Automática</div>
+                            <div style="font-size: 0.9rem; color: #a16207; margin-top: 4px;">Palabras clave técnicas añadidas automáticamente según tu sector</div>
                         </div>
-                        """)
-                        
+                    </div>
+                    """)
+                    
+                    # Botones de acción consolidados en fila
+                    with gr.Row():
                         generar_btn = gr.Button(
-                            "🤖 Generar CV Profesional",
+                            "🤖 Generar CV",
                             variant="primary",
                             size="lg",
-                            scale=1,
+                            scale=2,
                             elem_id="generate_button"
                         )
                         
-                        # Live Preview Toggle Button
                         live_preview_toggle = gr.Button(
-                            "👁️ Activar Vista Previa",
-                            variant="secondary",
-                            size="sm",
+                            "👁️ Vista Previa",
+                            variant="secondary", 
+                            size="lg",
                             scale=1,
                             elem_id="live_preview_toggle"
                         )
-                        
-                        # Indicador de progreso
-                        progress_html = gr.HTML(visible=False)
+                    
+                    # Tips consolidados en accordion
+                    with gr.Accordion("💡 Tips para un CV Exitoso", open=False):
+                        gr.Markdown("""
+                        **✨ Consejos clave:**
+                        - **Sé específico**: Usa números y métricas
+                        - **Personaliza**: Adapta cada CV a la oferta  
+                        - **Palabras clave**: Incluye términos del sector
+                        - **Formato limpio**: Usa viñetas y espacios
+                        - **Longitud ideal**: 1-2 páginas máximo
+                        """)
+                    
+                    # Indicador de progreso
+                    progress_html = gr.HTML(visible=False)
             
             # Área de resultados mejorada
             gr.Markdown("---")
@@ -1230,43 +1242,15 @@ Francés - Intermedio (B2)""",
             def toggle_live_preview(current_state):
                 new_state = not current_state
                 if new_state:
-                    return new_state, "🔴 Desactivar Vista Previa", gr.update(js="window.enableLivePreview()")
+                    return new_state, "🔴 Desactivar Vista Previa"
                 else:
-                    return new_state, "👁️ Activar Vista Previa", gr.update(js="window.disableLivePreview()")
+                    return new_state, "👁️ Activar Vista Previa"
             
             live_preview_toggle.click(
                 fn=toggle_live_preview,
                 inputs=[live_preview_state],
-                outputs=[live_preview_state, live_preview_toggle, gr.HTML(visible=False)]
+                outputs=[live_preview_state, live_preview_toggle]
             )
-            
-            # Información adicional
-            with gr.Accordion("📋 Consejos para un CV exitoso", open=False):
-                gr.Markdown("""
-                ### ✅ Mejores Prácticas:
-                
-                - **Sé específico**: Incluye logros cuantificables cuando sea posible
-                - **Palabras clave**: Usa términos relevantes a tu industria para optimización ATS  
-                - **Brevedad**: Mantén descripciones concisas pero impactantes
-                - **Actualización**: Revisa y actualiza regularmente tu información
-                
-                ### 🎨 Características del CV generado:
-                
-                - ✅ **Compatible con ATS** (Applicant Tracking Systems)
-                - ✅ **Diseño profesional y moderno** 
-                - ✅ **Formato estándar** reconocido por recruiters
-                - ✅ **Optimización con IA** para mejorar el contenido
-                - ✅ **Múltiples plantillas** para diferentes perfiles
-                - ✅ **Validación en tiempo real** de formularios
-                - ✅ **Auto-guardado** para no perder datos
-                
-                ### 💡 Consejos por Plantilla:
-                
-                - **🎨 Moderna**: Ideal para la mayoría de puestos profesionales
-                - **👔 Ejecutiva**: Perfecta para puestos directivos y senior
-                - **🌈 Creativa**: Destacar en diseño, marketing y roles creativos
-                - **💻 Técnica**: Optimizada para desarrolladores, ingenieros y IT
-                """)
             
             # Auto-save notification
             gr.HTML("""
