@@ -1160,8 +1160,7 @@ Francés - Intermedio (B2)""",
                             variant="secondary",
                             size="sm",
                             scale=1,
-                            elem_id="live_preview_toggle",
-                            info="Activa la vista previa en tiempo real del CV"
+                            elem_id="live_preview_toggle"
                         )
                         
                         # Indicador de progreso
