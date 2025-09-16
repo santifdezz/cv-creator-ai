@@ -276,3 +276,67 @@ def truncate_text(text: str, max_length: int = 100) -> str:
         return text
     
     return text[:max_length-3] + "..."
+
+# Funciones de validación compatibles con la aplicación principal
+def validate_email(email: str) -> bool:
+    """Alias para is_valid_email para compatibilidad con app.py"""
+    return is_valid_email(email)
+
+def validate_phone(phone: str) -> bool:
+    """Alias para is_valid_phone para compatibilidad con app.py"""
+    return is_valid_phone(phone)
+
+def validate_linkedin(linkedin_url: str) -> bool:
+    """
+    Valida si la URL de LinkedIn tiene un formato correcto
+    
+    Args:
+        linkedin_url: URL de LinkedIn a validar
+        
+    Returns:
+        bool: True si es válida, False en caso contrario
+    """
+    if not linkedin_url:
+        return True  # LinkedIn es opcional
+    
+    # Patrones válidos para LinkedIn
+    patterns = [
+        r'^https?://(?:www\.)?linkedin\.com/in/[\w\-\.]+/?$',
+        r'^https?://(?:es|en|fr|de)\.linkedin\.com/in/[\w\-\.]+/?$',
+        r'^linkedin\.com/in/[\w\-\.]+/?$',
+        r'^www\.linkedin\.com/in/[\w\-\.]+/?$'
+    ]
+    
+    # Limpiar espacios
+    cleaned_url = linkedin_url.strip()
+    
+    # Verificar contra los patrones
+    for pattern in patterns:
+        if re.match(pattern, cleaned_url, re.IGNORECASE):
+            return True
+    
+    return False
+
+def clean_text(text: str) -> str:
+    """
+    Limpia texto removiendo caracteres especiales y normalizando espacios
+    
+    Args:
+        text: Texto a limpiar
+        
+    Returns:
+        str: Texto limpio
+    """
+    if not text:
+        return ""
+    
+    # Remover caracteres especiales problemáticos pero mantener acentos
+    cleaned = re.sub(r'[<>&"\']', '', text)
+    
+    # Normalizar espacios en blanco
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    
+    # Limpiar espacios al inicio y final
+    cleaned = cleaned.strip()
+    
+    return cleaned
