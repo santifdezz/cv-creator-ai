@@ -60,7 +60,7 @@ def is_valid_phone(phone: str) -> bool:
     cleaned_phone = re.sub(r'[\s\-\(\)]', '', phone)
     return len(cleaned_phone) >= 8 and re.match(pattern, cleaned_phone) is not None
 
-def format_success_message(nombre: str, api_provider: str, modelo: str, ai_content: Dict[str, Any]) -> str:
+def format_success_message(nombre: str, api_provider: str, modelo: str, ai_content: Dict[str, Any], template: str = 'modern') -> str:
     """
     Formatea el mensaje de éxito después de generar el CV
     
@@ -69,6 +69,7 @@ def format_success_message(nombre: str, api_provider: str, modelo: str, ai_conte
         api_provider: Proveedor de IA utilizado
         modelo: Modelo específico usado
         ai_content: Contenido generado por IA
+        template: Plantilla de CV seleccionada
         
     Returns:
         str: Mensaje de éxito formateado
@@ -85,6 +86,16 @@ def format_success_message(nombre: str, api_provider: str, modelo: str, ai_conte
         method_used = "IA"
         generation_method = "por inteligencia artificial"
     
+    # Información de plantilla
+    template_info = {
+        'modern': '🎨 Moderna - Diseño limpio y profesional',
+        'executive': '👔 Ejecutiva - Estilo tradicional para puestos senior',
+        'creative': '🌈 Creativa - Para diseñadores y profesionales creativos',
+        'technical': '💻 Técnica - Optimizada para desarrolladores y IT'
+    }
+    
+    template_description = template_info.get(template, '🎨 Moderna - Diseño limpio y profesional')
+    
     # Truncar resumen para preview
     resumen_preview = ai_content.get('resumen_profesional', '')[:150]
     if len(ai_content.get('resumen_profesional', '')) > 150:
@@ -96,6 +107,7 @@ def format_success_message(nombre: str, api_provider: str, modelo: str, ai_conte
 **👤 Candidato:** {nombre}
 **🤖 Proveedor:** {provider_name}
 **🧠 Modelo:** {modelo}
+**🎨 Plantilla:** {template_description}
 
 **📝 Resumen Generado:** 
 {resumen_preview}
@@ -107,6 +119,7 @@ def format_success_message(nombre: str, api_provider: str, modelo: str, ai_conte
 - ✅ Estructura clara y legible
 - ✅ Categorización inteligente de habilidades
 - ✅ Experiencia laboral reformulada con logros
+- ✅ Plantilla {template_description.split(' - ')[0]} aplicada
 
 ⬇️ **Descarga tu CV usando el botón de abajo**
 

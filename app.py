@@ -20,6 +20,66 @@ class CVGeneratorApp:
         self.ai_service = AIService()
         self.pdf_generator = PDFGenerator()
     
+    def validate_email_realtime(self, email):
+        """Valida email en tiempo real"""
+        if not email:
+            return ""  # Sin mensaje si está vacío
+        
+        import re
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        
+        if re.match(pattern, email):
+            return '<div style="color: #10b981; font-size: 0.8rem; margin-top: 4px;">✅ Email válido</div>'
+        else:
+            return '<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">❌ Formato de email incorrecto</div>'
+    
+    def validate_phone_realtime(self, phone):
+        """Valida teléfono en tiempo real y sugiere formato"""
+        if not phone:
+            return ""  # Sin mensaje si está vacío
+        
+        import re
+        # Limpiar el teléfono
+        cleaned_phone = re.sub(r'[\s\-\(\)]', '', phone)
+        
+        if len(cleaned_phone) < 8:
+            return '<div style="color: #f59e0b; font-size: 0.8rem; margin-top: 4px;">⚠️ Teléfono muy corto (mínimo 8 dígitos)</div>'
+        elif len(cleaned_phone) > 15:
+            return '<div style="color: #f59e0b; font-size: 0.8rem; margin-top: 4px;">⚠️ Teléfono muy largo (máximo 15 dígitos)</div>'
+        elif not cleaned_phone.replace('+', '').isdigit():
+            return '<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">❌ Solo números, espacios, + y () permitidos</div>'
+        elif cleaned_phone.startswith('+'):
+            return '<div style="color: #10b981; font-size: 0.8rem; margin-top: 4px;">✅ Formato internacional correcto</div>'
+        elif len(cleaned_phone) == 9 and cleaned_phone.isdigit():
+            return f'<div style="color: #3b82f6; font-size: 0.8rem; margin-top: 4px;">💡 Sugerencia: +34 {phone} (España)</div>'
+        else:
+            return '<div style="color: #10b981; font-size: 0.8rem; margin-top: 4px;">✅ Formato válido</div>'
+    
+    def validate_linkedin_realtime(self, linkedin):
+        """Valida LinkedIn en tiempo real"""
+        if not linkedin:
+            return ""  # Sin mensaje si está vacío
+        
+        import re
+        
+        # Patrones válidos para LinkedIn
+        patterns = [
+            r'^linkedin\.com/in/[\w\-]+/?$',
+            r'^www\.linkedin\.com/in/[\w\-]+/?$',
+            r'^https?://(www\.)?linkedin\.com/in/[\w\-]+/?$',
+            r'^[\w\-]+$'  # Solo username
+        ]
+        
+        if any(re.match(pattern, linkedin) for pattern in patterns):
+            if linkedin.startswith('http'):
+                return '<div style="color: #10b981; font-size: 0.8rem; margin-top: 4px;">✅ URL completa válida</div>'
+            elif linkedin.startswith('linkedin.com') or linkedin.startswith('www.linkedin'):
+                return '<div style="color: #10b981; font-size: 0.8rem; margin-top: 4px;">✅ URL válida</div>'
+            else:
+                return f'<div style="color: #3b82f6; font-size: 0.8rem; margin-top: 4px;">💡 Se convertirá a: linkedin.com/in/{linkedin}</div>'
+        else:
+            return '<div style="color: #ef4444; font-size: 0.8rem; margin-top: 4px;">❌ Formato incorrecto. Ej: linkedin.com/in/usuario</div>'
+    
     def show_progress(self, message):
         """Muestra indicador de progreso"""
         return f"""
@@ -33,7 +93,7 @@ class CVGeneratorApp:
         
     async def generate_cv(self, nombre, email, telefono, linkedin, ubicacion, objetivo, 
                          experiencia_anos, experiencia_laboral, educacion, 
-                         habilidades, idiomas, api_provider, modelo_seleccionado, api_key):
+                         habilidades, idiomas, template_selector, api_provider, modelo_seleccionado, api_key):
         """Función principal para generar CV"""
         
         # Validar campos obligatorios
@@ -65,11 +125,11 @@ class CVGeneratorApp:
                 api_key.strip() if api_key else None
             )
             
-            # Crear PDF
-            pdf_path = self.pdf_generator.create_cv_pdf(form_data, ai_content)
+            # Crear PDF con la plantilla seleccionada
+            pdf_path = self.pdf_generator.create_cv_pdf(form_data, ai_content, template_selector)
             
             # Formatear mensaje de éxito
-            mensaje = format_success_message(nombre, api_provider, modelo_seleccionado, ai_content)
+            mensaje = format_success_message(nombre, api_provider, modelo_seleccionado, ai_content, template_selector)
             
             return mensaje, pdf_path
             
@@ -243,37 +303,171 @@ class CVGeneratorApp:
             margin: 16px 0;
         }
         
-        /* Responsive design - Mobile First */
+        /* Responsive design - Enhanced Mobile First */
         @media (max-width: 768px) {
             .gradio-container {
-                padding: 12px !important;
+                padding: 0.5rem !important;
+            }
+            
+            .main-header {
+                padding: 1.5rem 1rem !important;
+                margin-bottom: 1.5rem !important;
             }
             
             .main-header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem !important;
             }
             
-            .gr-form, .gr-panel {
-                padding: 16px !important;
-                margin-bottom: 16px !important;
+            .group,
+            .panel,
+            .gr-form,
+            .gr-panel {
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
             }
             
-            .gr-button-primary {
+            .gr-row {
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+            
+            .gr-column {
+                min-width: auto !important;
                 width: 100% !important;
-                padding: 16px !important;
-                font-size: 1rem !important;
+                margin-bottom: 1rem !important;
             }
             
-            .gr-textbox, .gr-dropdown, .gr-textarea {
-                padding: 14px !important;
-                font-size: 16px !important; /* Evita zoom en iOS */
+            /* Touch-friendly buttons */
+            .gr-button,
+            .gr-button-primary {
+                padding: 1rem 1.5rem !important;
+                font-size: 1.1rem !important;
+                width: 100% !important;
+                min-height: 48px !important;
+                touch-action: manipulation !important;
+            }
+            
+            /* Mobile-optimized inputs */
+            .gr-textbox,
+            .gr-dropdown,
+            .gr-textarea {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+                padding: 1rem !important;
+                min-height: 48px !important;
+                touch-action: manipulation !important;
+            }
+            
+            /* Better spacing for mobile */
+            .gr-form .form-info {
+                font-size: 0.85rem !important;
+                margin-top: 0.5rem !important;
+            }
+            
+            /* Mobile-friendly accordions */
+            .gr-accordion summary {
+                padding: 1.25rem !important;
+                font-size: 1rem !important;
+                min-height: 48px !important;
             }
         }
         
-        /* Mejoras para tablets */
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .gradio-container {
+                padding: 0.25rem !important;
+            }
+            
+            .main-header {
+                padding: 1rem 0.5rem !important;
+            }
+            
+            .main-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .main-header p {
+                font-size: 0.9rem !important;
+            }
+            
+            .group,
+            .panel,
+            .gr-form,
+            .gr-panel {
+                padding: 0.75rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .gr-textbox,
+            .gr-dropdown,
+            .gr-textarea {
+                font-size: 16px !important;
+                padding: 0.75rem !important;
+            }
+            
+            /* Compact buttons for small screens */
+            .gr-button,
+            .gr-button-primary {
+                padding: 0.75rem 1rem !important;
+                font-size: 1rem !important;
+            }
+        }
+        
+        /* Tablet landscape optimization */
         @media (min-width: 769px) and (max-width: 1024px) {
             .gradio-container {
-                padding: 16px !important;
+                padding: 1rem !important;
+            }
+            
+            .gr-column {
+                min-width: 300px !important;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Increase touch targets */
+            .gr-button,
+            .gr-textbox,
+            .gr-dropdown,
+            button,
+            input,
+            select {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+            
+            /* Remove hover effects on touch devices */
+            .gr-button:hover,
+            .group:hover,
+            .panel:hover {
+                transform: none !important;
+                box-shadow: var(--shadow-sm) !important;
+            }
+            
+            /* Optimize for touch scrolling */
+            body {
+                -webkit-overflow-scrolling: touch;
+                overflow-scrolling: touch;
+            }
+        }
+        
+        /* Landscape mobile optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-header {
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .main-header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .group,
+            .panel,
+            .gr-form,
+            .gr-panel {
+                padding: 0.75rem !important;
+                margin-bottom: 0.5rem !important;
             }
         }
         
@@ -478,7 +672,8 @@ class CVGeneratorApp:
                             label="Nombre Completo *",
                             placeholder="Ej: María García López",
                             info="Tu nombre completo como aparecerá en el CV",
-                            lines=1
+                            lines=1,
+                            elem_id="nombre_input"
                         )
                         
                         with gr.Row():
@@ -486,28 +681,81 @@ class CVGeneratorApp:
                                 label="Email *",
                                 placeholder="maria.garcia@email.com",
                                 info="Email profesional preferiblemente",
-                                lines=1
+                                lines=1,
+                                elem_id="email_input"
                             )
                             telefono = gr.Textbox(
                                 label="Teléfono *",
                                 placeholder="+34 666 123 456",
                                 info="Con código de país",
-                                lines=1
+                                lines=1,
+                                elem_id="telefono_input"
                             )
+                        
+                        # Indicadores de validación
+                        with gr.Row():
+                            email_validation = gr.HTML("", elem_id="email_validation")
+                            phone_validation = gr.HTML("", elem_id="phone_validation")
                         
                         with gr.Row():
                             linkedin = gr.Textbox(
                                 label="LinkedIn (Opcional)",
                                 placeholder="linkedin.com/in/maria-garcia",
                                 info="Solo el nombre de usuario o URL completa",
-                                lines=1
+                                lines=1,
+                                elem_id="linkedin_input"
                             )
                             ubicacion = gr.Textbox(
                                 label="Ubicación (Opcional)",
                                 placeholder="Madrid, España",
                                 info="Ciudad y país donde resides",
-                                lines=1
+                                lines=1,
+                                elem_id="ubicacion_input"
                             )
+                        
+                        # Indicador de validación LinkedIn
+                        linkedin_validation = gr.HTML("", elem_id="linkedin_validation")
+                    
+                    # Selector de plantilla CV
+                    with gr.Group():
+                        gr.Markdown("### 🎨 **Plantilla de CV**")
+                        
+                        template_choices = [
+                            ("🎨 Moderna - Diseño limpio y profesional", "modern"),
+                            ("👔 Ejecutiva - Estilo tradicional para puestos senior", "executive"),  
+                            ("🌈 Creativa - Para diseñadores y profesionales creativos", "creative"),
+                            ("💻 Técnica - Optimizada para desarrolladores y IT", "technical")
+                        ]
+                        
+                        template_selector = gr.Dropdown(
+                            choices=template_choices,
+                            value="modern",
+                            label="Plantilla de CV",
+                            info="🎯 Elige la plantilla que mejor se adapte a tu perfil profesional",
+                            interactive=True
+                        )
+                        
+                        # Vista previa de plantillas
+                        gr.HTML("""
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                            <div style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
+                                <strong style="color: #2563eb;">🎨 Moderna</strong><br>
+                                <small style="color: #6b7280;">Limpia y profesional</small>
+                            </div>
+                            <div style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; background: linear-gradient(135deg, #f9fafb, #f3f4f6);">
+                                <strong style="color: #374151;">👔 Ejecutiva</strong><br>
+                                <small style="color: #6b7280;">Tradicional y formal</small>
+                            </div>
+                            <div style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; background: linear-gradient(135deg, #fef7ff, #f3e8ff);">
+                                <strong style="color: #7c3aed;">🌈 Creativa</strong><br>
+                                <small style="color: #6b7280;">Colorida y llamativa</small>
+                            </div>
+                            <div style="padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+                                <strong style="color: #16a34a;">💻 Técnica</strong><br>
+                                <small style="color: #6b7280;">Estructurada y clara</small>
+                            </div>
+                        </div>
+                        """)
                     
                     # Perfil profesional
                     with gr.Group():
@@ -527,7 +775,7 @@ class CVGeneratorApp:
                             value="2-3 años"
                         )
                     
-                    # Experiencia y educación
+                    # Experiencia y educación (movido arriba)
                     with gr.Group():
                         gr.Markdown("### 💼 **Experiencia y Formación**")
                         
@@ -548,12 +796,11 @@ Certificación AWS Solutions Architect - 2022""",
                             info="Una línea por titulación/certificación",
                             lines=4
                         )
-                
-                # Columna derecha: Habilidades y acción (30%)
-                with gr.Column(scale=3, min_width=300):
-                    gr.Markdown("## 🔧 Habilidades y Competencias")
                     
+                    # Habilidades y competencias (movido abajo)
                     with gr.Group():
+                        gr.Markdown("### 🔧 **Habilidades y Competencias**")
+                        
                         habilidades = gr.Textbox(
                             label="Habilidades Técnicas (Opcional)",
                             placeholder="JavaScript, React, Node.js, Python, SQL, Git, Docker, AWS, Agile, Scrum",
@@ -569,9 +816,10 @@ Francés - Intermedio (B2)""",
                             info="Una línea por idioma con nivel",
                             lines=4
                         )
-                    
-                    # Botón de generación destacado
-                    gr.Markdown("### 🚀 **Generar tu CV**")
+                
+                # Columna derecha: Generación y acción (30%)
+                with gr.Column(scale=3, min_width=300):
+                    gr.Markdown("## � Generar tu CV")
                     
                     with gr.Group():
                         gr.HTML("""
@@ -587,7 +835,18 @@ Francés - Intermedio (B2)""",
                             "🤖 Generar CV Profesional",
                             variant="primary",
                             size="lg",
-                            scale=1
+                            scale=1,
+                            elem_id="generate_button"
+                        )
+                        
+                        # Live Preview Toggle Button
+                        live_preview_toggle = gr.Button(
+                            "👁️ Activar Vista Previa",
+                            variant="secondary",
+                            size="sm",
+                            scale=1,
+                            elem_id="live_preview_toggle",
+                            info="Activa la vista previa en tiempo real del CV"
                         )
                         
                         # Indicador de progreso
@@ -614,7 +873,7 @@ Francés - Intermedio (B2)""",
                 inputs=[
                     nombre, email, telefono, linkedin, ubicacion, objetivo,
                     experiencia_anos, experiencia_laboral, educacion, 
-                    habilidades, idiomas, api_provider, modelo_seleccionado, api_key
+                    habilidades, idiomas, template_selector, api_provider, modelo_seleccionado, api_key
                 ],
                 outputs=[resultado_texto, archivo_descarga]
             )
@@ -631,6 +890,310 @@ Francés - Intermedio (B2)""",
                 inputs=[api_provider],
                 outputs=[api_key]
             )
+            
+            # Validaciones en tiempo real
+            email.change(
+                fn=self.validate_email_realtime,
+                inputs=[email],
+                outputs=[email_validation]
+            )
+            
+            telefono.change(
+                fn=self.validate_phone_realtime,
+                inputs=[telefono],
+                outputs=[phone_validation]
+            )
+            
+            linkedin.change(
+                fn=self.validate_linkedin_realtime,
+                inputs=[linkedin],
+                outputs=[linkedin_validation]
+            )
+            
+            # Live Preview Toggle Handler
+            live_preview_state = gr.State(False)
+            
+            def toggle_live_preview(current_state):
+                new_state = not current_state
+                if new_state:
+                    return new_state, "🔴 Desactivar Vista Previa", gr.update(js="window.enableLivePreview()")
+                else:
+                    return new_state, "👁️ Activar Vista Previa", gr.update(js="window.disableLivePreview()")
+            
+            live_preview_toggle.click(
+                fn=toggle_live_preview,
+                inputs=[live_preview_state],
+                outputs=[live_preview_state, live_preview_toggle, gr.HTML(visible=False)]
+            )
+            
+            # Información adicional
+            with gr.Accordion("📋 Consejos para un CV exitoso", open=False):
+                gr.Markdown("""
+                ### ✅ Mejores Prácticas:
+                
+                - **Sé específico**: Incluye logros cuantificables cuando sea posible
+                - **Palabras clave**: Usa términos relevantes a tu industria para optimización ATS  
+                - **Brevedad**: Mantén descripciones concisas pero impactantes
+                - **Actualización**: Revisa y actualiza regularmente tu información
+                
+                ### 🎨 Características del CV generado:
+                
+                - ✅ **Compatible con ATS** (Applicant Tracking Systems)
+                - ✅ **Diseño profesional y moderno** 
+                - ✅ **Formato estándar** reconocido por recruiters
+                - ✅ **Optimización con IA** para mejorar el contenido
+                - ✅ **Múltiples plantillas** para diferentes perfiles
+                - ✅ **Validación en tiempo real** de formularios
+                - ✅ **Auto-guardado** para no perder datos
+                
+                ### 💡 Consejos por Plantilla:
+                
+                - **🎨 Moderna**: Ideal para la mayoría de puestos profesionales
+                - **👔 Ejecutiva**: Perfecta para puestos directivos y senior
+                - **🌈 Creativa**: Destacar en diseño, marketing y roles creativos
+                - **💻 Técnica**: Optimizada para desarrolladores, ingenieros y IT
+                """)
+            
+            # Auto-save notification
+            gr.HTML("""
+            <script>
+            // Enhanced Auto-save functionality for CV Generator
+            (function() {
+                const STORAGE_KEY = 'cv_generator_autosave';
+                const SAVE_INTERVAL = 30000; // 30 seconds
+                
+                let saveTimer = null;
+                let hasUnsavedChanges = false;
+                
+                function saveFormData() {
+                    try {
+                        const formData = {};
+                        const inputs = document.querySelectorAll('input[type="text"], textarea, select');
+                        
+                        inputs.forEach(input => {
+                            if (input.value && input.value.trim()) {
+                                // Use placeholder as key if no ID available
+                                let key = input.id || input.placeholder || input.name || 'unknown';
+                                key = key.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                                formData[key] = input.value.trim();
+                            }
+                        });
+                        
+                        if (Object.keys(formData).length > 0) {
+                            formData.timestamp = new Date().toISOString();
+                            formData.version = '1.1';
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+                            hasUnsavedChanges = false;
+                            console.log('📝 Form auto-saved at', new Date().toLocaleTimeString());
+                        }
+                    } catch (error) {
+                        console.error('❌ Auto-save failed:', error);
+                    }
+                }
+                
+                function loadSavedData() {
+                    try {
+                        const savedData = localStorage.getItem(STORAGE_KEY);
+                        if (!savedData) return false;
+                        
+                        const data = JSON.parse(savedData);
+                        const savedTime = new Date(data.timestamp);
+                        const hoursSince = (new Date() - savedTime) / (1000 * 60 * 60);
+                        
+                        // Only show if saved within last 24 hours
+                        if (hoursSince < 24) {
+                            showAutoSaveNotification(savedTime, data);
+                            return true;
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to load saved data:', error);
+                    }
+                    return false;
+                }
+                
+                function showAutoSaveNotification(savedTime, data) {
+                    const notification = document.createElement('div');
+                    notification.innerHTML = `
+                        <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; animation: slideIn 0.3s ease;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.2rem;">💾</span>
+                                <div>
+                                    <strong style="color: #92400e;">Datos guardados encontrados</strong><br>
+                                    <small style="color: #a16207;">Guardado: ${savedTime.toLocaleString()}</small>
+                                </div>
+                                <button onclick="this.parentElement.parentElement.remove()" 
+                                        style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #92400e;">×</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert at the top of the container
+                    setTimeout(() => {
+                        const container = document.querySelector('.gradio-container');
+                        if (container) {
+                            container.insertBefore(notification, container.firstChild);
+                            // Auto-hide after 10 seconds
+                            setTimeout(() => {
+                                if (notification.parentNode) {
+                                    notification.style.animation = 'slideOut 0.3s ease';
+                                    setTimeout(() => notification.remove(), 300);
+                                }
+                            }, 10000);
+                        }
+                    }, 1000);
+                }
+                
+                function setupAutoSave() {
+                    // Set up periodic save
+                    saveTimer = setInterval(saveFormData, SAVE_INTERVAL);
+                    
+                    // Save on input changes (debounced)
+                    let changeTimer = null;
+                    document.addEventListener('input', function(e) {
+                        if (e.target.matches('input[type="text"], textarea, select')) {
+                            hasUnsavedChanges = true;
+                            clearTimeout(changeTimer);
+                            changeTimer = setTimeout(saveFormData, 3000); // Save 3 seconds after last change
+                        }
+                    });
+                    
+                    // Save before page unload
+                    window.addEventListener('beforeunload', function(e) {
+                        if (hasUnsavedChanges) {
+                            saveFormData();
+                        }
+                    });
+                    
+                    // Load saved data on startup
+                    setTimeout(loadSavedData, 2000);
+                    
+                    console.log('🔄 Auto-save system initialized');
+                }
+                
+                // CSS animations
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { opacity: 0; transform: translateY(-20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    @keyframes slideOut {
+                        from { opacity: 1; transform: translateY(0); }
+                        to { opacity: 0; transform: translateY(-20px); }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Initialize when DOM is ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', setupAutoSave);
+                } else {
+                    setTimeout(setupAutoSave, 1000);
+                }
+            })();
+            
+            // Live PDF Preview functionality
+            (function() {
+                let previewTimeout;
+                let isPreviewEnabled = false;
+                
+                function enableLivePreview() {
+                    isPreviewEnabled = true;
+                    updatePreviewButton();
+                    showNotification('👁️ Vista previa en vivo activada', 'success');
+                }
+                
+                function disableLivePreview() {
+                    isPreviewEnabled = false;
+                    updatePreviewButton();
+                    clearTimeout(previewTimeout);
+                    showNotification('🔴 Vista previa en vivo desactivada', 'info');
+                }
+                
+                function updatePreviewButton() {
+                    const button = document.querySelector('#live_preview_toggle button');
+                    if (button) {
+                        button.textContent = isPreviewEnabled ? '🔴 Desactivar Vista Previa' : '👁️ Activar Vista Previa';
+                        button.style.backgroundColor = isPreviewEnabled ? '#ef4444' : '#10b981';
+                    }
+                }
+                
+                function schedulePreviewUpdate() {
+                    if (!isPreviewEnabled) return;
+                    
+                    clearTimeout(previewTimeout);
+                    previewTimeout = setTimeout(() => {
+                        triggerPreviewUpdate();
+                    }, 3000); // Update preview 3 seconds after user stops typing
+                }
+                
+                function triggerPreviewUpdate() {
+                    const generateButton = document.querySelector('#generate_button button');
+                    if (generateButton && isPreviewEnabled) {
+                        // Show preview indicator
+                        const originalText = generateButton.textContent;
+                        generateButton.textContent = '🔄 Actualizando vista previa...';
+                        generateButton.style.backgroundColor = '#f59e0b';
+                        
+                        // Trigger CV generation
+                        generateButton.click();
+                        
+                        // Reset button after a delay
+                        setTimeout(() => {
+                            if (generateButton.textContent.includes('Actualizando')) {
+                                generateButton.textContent = originalText;
+                                generateButton.style.backgroundColor = '';
+                            }
+                        }, 3000);
+                    }
+                }
+                
+                // Live preview input monitoring
+                function setupLivePreview() {
+                    const inputs = document.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', schedulePreviewUpdate);
+                        input.addEventListener('change', schedulePreviewUpdate);
+                    });
+                    
+                    // Monitor for new inputs added dynamically
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === 1) { // Element node
+                                    const newInputs = node.querySelectorAll('input, textarea, select');
+                                    newInputs.forEach(input => {
+                                        input.addEventListener('input', schedulePreviewUpdate);
+                                        input.addEventListener('change', schedulePreviewUpdate);
+                                    });
+                                }
+                            });
+                        });
+                    });
+                    
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+                
+                // Make functions available globally for Gradio events
+                window.enableLivePreview = enableLivePreview;
+                window.disableLivePreview = disableLivePreview;
+                
+                // Initialize live preview when page loads
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(setupLivePreview, 1000);
+                        setTimeout(updatePreviewButton, 1500);
+                    });
+                } else {
+                    setTimeout(setupLivePreview, 1000);
+                    setTimeout(updatePreviewButton, 1500);
+                }
+            })();
+            </script>
+            """)
             
             # Información adicional
             with gr.Accordion("📋 Consejos para un CV exitoso", open=False):
