@@ -300,19 +300,13 @@ Habilidades: JavaScript, React, Python
 ### Salida Optimizada por IA:
 ```
 🎯 Resumen Profesional:
-"Desarrollador Full Stack con 4+ años de experiencia especializando en tecnologías web modernas. Expertise en JavaScript, React y Python con historial comproba
+"Desarrollador Full Stack con 4+ años de experiencia especializando en tecnologías web modernas. Expertise en JavaScript, React y Python con historial comprobado"
+```
 ---
-## 🛠️ Futuras mejoras
 
-- Añadir plantillas personalizables para CV.
+## 🛠️ ROADMAP
 
-- Integrar validaciones de datos.
-
-- Servicio premium con revisión humana.
-
-- Adaptar CVs para diferentes sectores y ATS.
-
-- Implementar versión multilingüe (español / inglés).
+Ver [`ROADMAP.md`](ROADMAP.md) completo.
 
 ---
 ## 📄 Licencia
