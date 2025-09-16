@@ -3,7 +3,6 @@ on:
   push:
     branches: [main]
 
-  # to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -20,5 +19,5 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git remote add hf https://santifdezz:$HF_TOKEN@huggingface.co/spaces/santifdezz/cv-generator
+          git remote add hf https://$HF_TOKEN@huggingface.co/spaces/santifdezz/cv-generator
           git push hf main
