@@ -11,7 +11,7 @@ license: mit
 short_description: CVision - AI Curriculum Vitae Generator 
 ---
 
-# Generador Automático de CV y Cartas de Presentación 
+# Generador Automático de CV y Cartas de Presentación ( EN DESARROLLO )
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
